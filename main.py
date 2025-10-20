@@ -1,12 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import os
 from werkzeug.utils import secure_filename
+from playwright.sync_api import sync_playwright
+import time
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# --- File upload setup (move inside static for public access) ---
+# --- File upload setup ---
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -14,7 +16,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # --- Database setup ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///applications.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 
 # --- Database Model ---
@@ -36,23 +37,23 @@ with app.app_context():
 
 # --- Routes ---
 
-# Home page / form
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Form submission
 @app.route('/apply', methods=['POST'])
 def apply():
     form = request.form
     file = request.files.get('resume')
 
     resume_filename = None
+    file_path = None
     if file and file.filename:
         resume_filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], resume_filename))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], resume_filename)
+        file.save(file_path)
 
-    # Save to DB
+    # 1️⃣ Save to local DB
     application = Application(
         first_name=form.get('first_name'),
         last_name=form.get('last_name'),
@@ -68,19 +69,86 @@ def apply():
     db.session.add(application)
     db.session.commit()
 
-    return jsonify({'success': True, 'message': 'Application submitted successfully!'})
+    # 2️⃣ Automatically submit to Website 1
+    website1_form_url = "https://main-web-1.onrender.com/apply"      # Partner site form URL
+    website1_thankyou_url = "https://main-web-1.onrender.com/success"
 
-# Dashboard / view all submissions
+    website1_fields = {
+        'input[name="first_name"]': form.get('first_name'),
+        'input[name="last_name"]': form.get('last_name'),
+        'input[name="email"]': form.get('email'),
+        'input[name="phone"]': form.get('phone'),
+        'input[name="country"]': form.get('country'),
+        'input[name="city"]': form.get('city'),
+        'input[name="address"]': form.get('address'),
+        'input[name="position"]': form.get('position'),
+        'textarea[name="additional_info"]': form.get('additional_info'),
+    }
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(website1_form_url, timeout=60000)
+
+            # Fill fields
+            for selector, value in website1_fields.items():
+                if value is None:
+                    value = ""
+                try:
+                    page.fill(selector, value)
+                except Exception:
+                    try:
+                        # fallback by name attribute
+                        name_attr = selector.split('name="')[1].split('"')[0]
+                        page.fill(f'[name="{name_attr}"]', value)
+                    except Exception as e:
+                        app.logger.warning(f"Could not fill {selector}: {e}")
+
+            # Upload resume if exists
+            if file_path and os.path.exists(file_path):
+                try:
+                    page.set_input_files('input[type="file"]', file_path)
+                except Exception as e:
+                    app.logger.warning(f"Could not upload file to partner site: {e}")
+
+            # Submit form
+            try:
+                page.click('button[type="submit"]')
+            except Exception:
+                try:
+                    page.click('input[type="submit"]')
+                except Exception as e:
+                    app.logger.error(f"Could not submit form on partner site: {e}")
+
+            # Wait for thank-you page
+            try:
+                page.wait_for_url("**/thank-you", timeout=15000)
+                browser.close()
+                return redirect(website1_thankyou_url)
+            except Exception:
+                time.sleep(2)
+                if page.query_selector(".success, .thank-you, #success-message"):
+                    browser.close()
+                    return redirect(website1_thankyou_url)
+                else:
+                    browser.close()
+                    flash("Partner site submission failed. Saved locally.")
+                    return redirect(url_for('index'))
+
+    except Exception as e:
+        app.logger.error(f"Playwright automation failed: {e}")
+        flash("Automation failed; your application is saved locally.")
+        return redirect(url_for('index'))
+
 @app.route('/applications')
 def view_applications():
     apps = Application.query.order_by(Application.id.desc()).all()
     return render_template('applications.html', applications=apps)
 
-# Serve uploaded resumes
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# --- Run app ---
 if __name__ == '__main__':
     app.run(debug=True)
