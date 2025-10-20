@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
+app.secret_key = 'supersecretkey'
 
 # --- File upload setup ---
 UPLOAD_FOLDER = 'uploads'
@@ -32,13 +33,16 @@ class Application(db.Model):
 with app.app_context():
     db.create_all()
 
+# --- Routes ---
+
+# Home page / form
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# Form submission
 @app.route('/apply', methods=['POST'])
 def apply():
-    # Get form fields
     form = request.form
     file = request.files.get('resume')
 
@@ -65,5 +69,12 @@ def apply():
 
     return jsonify({'success': True, 'message': 'Application submitted successfully!'})
 
+# Dashboard / view all submissions
+@app.route('/applications')
+def view_applications():
+    apps = Application.query.order_by(Application.id.desc()).all()
+    return render_template('applications.html', applications=apps)
+
+# --- Run app ---
 if __name__ == '__main__':
     app.run(debug=True)

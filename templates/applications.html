@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+    <title>All Applications</title>
+</head>
+<body>
+<h1>Submitted Applications</h1>
+<table border="1" cellpadding="5" cellspacing="0">
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Phone</th>
+    <th>Country</th>
+    <th>City</th>
+    <th>Address</th>
+    <th>Position</th>
+    <th>Additional Info</th>
+    <th>Resume</th>
+</tr>
+{% for app in applications %}
+<tr>
+    <td>{{ app.id }}</td>
+    <td>{{ app.first_name }} {{ app.last_name }}</td>
+    <td>{{ app.email }}</td>
+    <td>{{ app.phone }}</td>
+    <td>{{ app.country }}</td>
+    <td>{{ app.city }}</td>
+    <td>{{ app.address }}</td>
+    <td>{{ app.position }}</td>
+    <td>{{ app.additional_info }}</td>
+    <td>
+        {% if app.resume_filename %}
+        <a href="{{ url_for('static', filename='../uploads/' + app.resume_filename) }}" target="_blank">View</a>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</table>
+</body>
+</html>
