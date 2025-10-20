@@ -31,7 +31,7 @@
     <td>{{ app.additional_info }}</td>
     <td>
         {% if app.resume_filename %}
-        <a href="{{ url_for('static', filename='../uploads/' + app.resume_filename) }}" target="_blank">View</a>
+        <a href="{{ url_for('uploaded_file', filename=app.resume_filename) }}" target="_blank">View</a>
         {% endif %}
     </td>
 </tr>

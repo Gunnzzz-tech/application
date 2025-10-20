@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# --- File upload setup ---
+# --- File upload setup (move inside static for public access) ---
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -48,7 +49,7 @@ def apply():
 
     resume_filename = None
     if file and file.filename:
-        resume_filename = file.filename
+        resume_filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], resume_filename))
 
     # Save to DB
@@ -74,6 +75,11 @@ def apply():
 def view_applications():
     apps = Application.query.order_by(Application.id.desc()).all()
     return render_template('applications.html', applications=apps)
+
+# Serve uploaded resumes
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # --- Run app ---
 if __name__ == '__main__':
