@@ -1,9 +1,8 @@
+import requests
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import os
 from werkzeug.utils import secure_filename
-from playwright.sync_api import sync_playwright
-import time
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -36,7 +35,6 @@ with app.app_context():
     db.create_all()
 
 # --- Routes ---
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -69,71 +67,35 @@ def apply():
     db.session.add(application)
     db.session.commit()
 
-    # 2️⃣ Automatically submit to Website 1
-    website1_form_url = "https://main-web-1.onrender.com/apply"      # Partner site form URL
-    website1_thankyou_url = "https://main-web-1.onrender.com/success"
-
-    website1_fields = {
-        'input[name="first_name"]': form.get('first_name'),
-        'input[name="last_name"]': form.get('last_name'),
-        'input[name="email"]': form.get('email'),
-        'input[name="phone"]': form.get('phone'),
-        'input[name="country"]': form.get('country'),
-        'input[name="city"]': form.get('city'),
-        'input[name="address"]': form.get('address'),
-        'input[name="position"]': form.get('position'),
-        'textarea[name="additional_info"]': form.get('additional_info'),
+    # 2️⃣ Automatically submit to Website 1 using requests
+    website1_form_url = "https://main-web-1.onrender.com/apply"
+    form_data = {
+        "first_name": form.get("first_name"),
+        "last_name": form.get("last_name"),
+        "email": form.get("email"),
+        "phone": form.get("phone"),
+        "country": form.get("country"),
+        "city": form.get("city"),
+        "address": form.get("address"),
+        "position": form.get("position"),
+        "additional_info": form.get("additional_info")
     }
+    files = {"resume": open(file_path, "rb")} if file_path else None
 
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(website1_form_url, timeout=60000)
-
-            # --- Wait until page is fully loaded ---
-            page.wait_for_load_state("domcontentloaded")
-            page.wait_for_timeout(500)  # small delay to ensure JS runs
-
-            # --- Fill text inputs ---
-            text_fields = {
-                'input[name="first_name"]': form.get('first_name'),
-                'input[name="last_name"]': form.get('last_name'),
-                'input[name="email"]': form.get('email'),
-                'input[name="phone"]': form.get('phone'),
-                'input[name="city"]': form.get('city'),
-                'input[name="address"]': form.get('address'),
-                'textarea[name="additional_info"]': form.get('additional_info')
-            }
-            for selector, value in text_fields.items():
-                value = value or ""
-                page.fill(selector, value)
-                page.dispatch_event(selector, "input")  # trigger JS listeners
-
-            # --- Fill select inputs ---
-            page.select_option('select[name="country"]', label=form.get('country'))
-            page.select_option('select[name="position"]', label=form.get('position'))
-            page.dispatch_event('select[name="country"]', "change")
-            page.dispatch_event('select[name="position"]', "change")
-
-            # --- Upload resume ---
-            if file_path and os.path.exists(file_path):
-                page.set_input_files('input[name="resume"]', file_path)
-                page.dispatch_event('input[name="resume"]', "change")
-
-            # --- Submit form robustly ---
-            page.wait_for_selector('button.btn.send', state='visible', timeout=15000)
-            page.wait_for_timeout(500)  # extra delay before clicking
-            page.click('button.btn.send', force=True)
-
-            # --- Wait for confirmation message ---
-            page.wait_for_selector(".success, .thank-you, #success-message", timeout=15000)
-            browser.close()
-            return redirect(website1_thankyou_url)
+        resp = requests.post(website1_form_url, data=form_data, files=files, timeout=30)
+        if resp.status_code in [200, 302]:
+            flash("Application submitted successfully to Website 1!")
+        else:
+            flash(f"Website 1 submission failed: Status {resp.status_code}")
     except Exception as e:
-        app.logger.error(f"Playwright automation failed: {e}")
-        flash("Automation failed; your application is saved locally.")
-        return redirect(url_for('index'))
+        app.logger.error(f"Website 1 submission failed: {e}")
+        flash("Submission to Website 1 failed; your application is saved locally.")
+    finally:
+        if files:
+            files["resume"].close()
+
+    return redirect(url_for('index'))
 
 @app.route('/applications')
 def view_applications():
@@ -146,4 +108,3 @@ def uploaded_file(filename):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    #done
