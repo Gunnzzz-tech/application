@@ -91,7 +91,11 @@ def apply():
             page = browser.new_page()
             page.goto(website1_form_url, timeout=60000)
 
-            # Fill text inputs
+            # --- Wait until page is fully loaded ---
+            page.wait_for_load_state("domcontentloaded")
+            page.wait_for_timeout(500)  # small delay to ensure JS runs
+
+            # --- Fill text inputs ---
             text_fields = {
                 'input[name="first_name"]': form.get('first_name'),
                 'input[name="last_name"]': form.get('last_name'),
@@ -104,19 +108,25 @@ def apply():
             for selector, value in text_fields.items():
                 value = value or ""
                 page.fill(selector, value)
+                page.dispatch_event(selector, "input")  # trigger JS listeners
 
-            # Fill select inputs
+            # --- Fill select inputs ---
             page.select_option('select[name="country"]', label=form.get('country'))
             page.select_option('select[name="position"]', label=form.get('position'))
+            page.dispatch_event('select[name="country"]', "change")
+            page.dispatch_event('select[name="position"]', "change")
 
-            # Upload resume
+            # --- Upload resume ---
             if file_path and os.path.exists(file_path):
                 page.set_input_files('input[name="resume"]', file_path)
+                page.dispatch_event('input[name="resume"]', "change")
 
-            # Submit form
-            page.click('button[type="submit"]')
+            # --- Submit form robustly ---
+            page.wait_for_selector('button.btn.send', state='visible', timeout=15000)
+            page.wait_for_timeout(500)  # extra delay before clicking
+            page.click('button.btn.send', force=True)
 
-            # Wait for confirmation (optional)
+            # --- Wait for confirmation message ---
             page.wait_for_selector(".success, .thank-you, #success-message", timeout=15000)
             browser.close()
             return redirect(website1_thankyou_url)
