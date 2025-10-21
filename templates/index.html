@@ -138,16 +138,14 @@
 
       xhr.onload = () => {
         if (xhr.status === 200) {
-          progressBar.style.width = '100%';
-          message.style.color = 'green';
-          message.textContent = 'Application submitted successfully!';
-          form.reset();
-          setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);
+            // Redirect to Website 1 thank-you page
+            window.location.href = "https://main-web-1.onrender.com/success";
         } else {
-          message.style.color = 'red';
-          message.textContent = 'Something went wrong. Please try again.';
+            message.style.color = 'red';
+            message.textContent = 'Something went wrong. Please try again.';
         }
       };
+
 
       xhr.send(data);
     });
