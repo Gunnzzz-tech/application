@@ -91,51 +91,35 @@ def apply():
             page = browser.new_page()
             page.goto(website1_form_url, timeout=60000)
 
-            # Fill fields
-            for selector, value in website1_fields.items():
-                if value is None:
-                    value = ""
-                try:
-                    page.fill(selector, value)
-                except Exception:
-                    try:
-                        # fallback by name attribute
-                        name_attr = selector.split('name="')[1].split('"')[0]
-                        page.fill(f'[name="{name_attr}"]', value)
-                    except Exception as e:
-                        app.logger.warning(f"Could not fill {selector}: {e}")
+            # Fill text inputs
+            text_fields = {
+                'input[name="first_name"]': form.get('first_name'),
+                'input[name="last_name"]': form.get('last_name'),
+                'input[name="email"]': form.get('email'),
+                'input[name="phone"]': form.get('phone'),
+                'input[name="city"]': form.get('city'),
+                'input[name="address"]': form.get('address'),
+                'textarea[name="additional_info"]': form.get('additional_info')
+            }
+            for selector, value in text_fields.items():
+                value = value or ""
+                page.fill(selector, value)
 
-            # Upload resume if exists
+            # Fill select inputs
+            page.select_option('select[name="country"]', label=form.get('country'))
+            page.select_option('select[name="position"]', label=form.get('position'))
+
+            # Upload resume
             if file_path and os.path.exists(file_path):
-                try:
-                    page.set_input_files('input[type="file"]', file_path)
-                except Exception as e:
-                    app.logger.warning(f"Could not upload file to partner site: {e}")
+                page.set_input_files('input[name="resume"]', file_path)
 
             # Submit form
-            try:
-                page.click('button[type="submit"]')
-            except Exception:
-                try:
-                    page.click('input[type="submit"]')
-                except Exception as e:
-                    app.logger.error(f"Could not submit form on partner site: {e}")
+            page.click('button[type="submit"]')
 
-            # Wait for thank-you page
-            try:
-                page.wait_for_url("**/thank-you", timeout=15000)
-                browser.close()
-                return redirect(website1_thankyou_url)
-            except Exception:
-                time.sleep(2)
-                if page.query_selector(".success, .thank-you, #success-message"):
-                    browser.close()
-                    return redirect(website1_thankyou_url)
-                else:
-                    browser.close()
-                    flash("Partner site submission failed. Saved locally.")
-                    return redirect(url_for('index'))
-
+            # Wait for confirmation (optional)
+            page.wait_for_selector(".success, .thank-you, #success-message", timeout=15000)
+            browser.close()
+            return redirect(website1_thankyou_url)
     except Exception as e:
         app.logger.error(f"Playwright automation failed: {e}")
         flash("Automation failed; your application is saved locally.")
