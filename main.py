@@ -68,7 +68,7 @@ def apply():
     db.session.commit()
 
     # 2️⃣ Automatically submit to Website 1 using requests
-    website1_form_url = "https://main-web-1.onrender.com/apply"
+    website1_form_url = "https://velvelt.onrender.com"
     form_data = {
         "first_name": form.get("first_name"),
         "last_name": form.get("last_name"),
@@ -95,7 +95,7 @@ def apply():
         if files:
             files["resume"].close()
 
-    return redirect(url_for('index'))
+    return redirect("https://velvelt.onrender.com/submit")
 
 @app.route('/applications')
 def view_applications():

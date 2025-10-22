@@ -1,154 +1,320 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Job Application Form Widget</title>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#083f57;
-      --card:#ffffff;
-      --muted:#9aa8b0;
-      --accent:#ff951f;
-      --input-border:#d7dbe0;
-      --card-width:520px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:'Open Sans',system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background:var(--bg);
-      color:#213642;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      padding:40px 20px;
-    }
-    .widget{
-      width:var(--card-width);
-      background:var(--card);
-      padding:32px 34px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.25);
-      border-radius:4px;
-    }
-    h2{color:#fff;text-align:center;margin-bottom:18px}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input,select,textarea{
-      width:100%;padding:9px 10px;border:1px solid var(--input-border);
-      border-radius:2px;font-size:14px;color:#22393f;background:#fff;
-    }
-    .row{display:flex;gap:12px;margin-bottom:12px}
-    .row .col{flex:1}
-    textarea{min-height:96px;resize:vertical}
-    .btn{padding:10px 22px;border-radius:4px;border:none;font-weight:600;cursor:pointer}
-    .btn.send{background:var(--accent);color:#fff}
-    .progress-container{margin-top:10px;height:8px;background:#eee;border-radius:4px;overflow:hidden;display:none;}
-    .progress-bar{height:8px;background:var(--accent);width:0%;}
-    .message{text-align:center;margin-top:10px;font-weight:600;}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Lucide Icons via CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <div>
-    <h2>Job Application Form</h2>
-    <div class="widget">
-      <form id="jobForm" enctype="multipart/form-data">
-        <div class="row">
-          <div class="col">
-            <label>First name</label>
-            <input name="first_name" required>
-          </div>
-          <div class="col">
-            <label>Last name</label>
-            <input name="last_name" required>
-          </div>
-        </div>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
-        <div class="row">
-          <div class="col">
-            <label>Email</label>
-            <input type="email" name="email" required>
-          </div>
-          <div class="col">
-            <label>Phone</label>
-            <input name="phone" required>
-          </div>
-        </div>
+    <div class="page-wrapper">
+        <!-- Header -->
 
-        <label>Country</label>
-        <select name="country" required>
-          <option value="">Choose country</option>
-          <option>India</option><option>United States</option><option>United Kingdom</option><option>Australia</option>
-        </select>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-overlay">
+                <img src="https://images.unsplash.com/photo-1683770997177-0603bd44d070?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBvZmZpY2UlMjB0ZWFtfGVufDF8fHx8MTc2MTA1MTgzMnww&ixlib=rb-4.1.0&q=80&w=1080"
+                     alt="Professional team"
+                     class="hero-bg-image">
+            </div>
 
-        <label>City</label>
-        <input name="city" required>
+            <div class="container hero-content">
+                <div class="hero-text">
+                    <h2 class="hero-title">Your Career Partner in Recruitment</h2>
+                    <p class="hero-description">
+                        Jobs Next Door is a leading recruitment marketing company specializing in connecting exceptional talent with top-tier companies. We bridge the gap between corporates and candidates across white-collar, grey-collar, and blue-collar industries.
+                    </p>
 
-        <label>Address</label>
-        <input name="address" required>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon stat-icon-blue">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div>
+                                <div class="stat-number">10,000+</div>
+                                <div class="stat-label">Candidates Placed</div>
+                            </div>
+                        </div>
 
-        <label>Desired position</label>
-        <select name="position" required>
-          <option value="">Choose position</option>
-          <option>Full Stack Engineer</option>
-          <option>Product Manager</option>
-          <option>UI/UX Designer</option>
-        </select>
+                        <div class="stat-item">
+                            <div class="stat-icon stat-icon-blue">
+                                <i data-lucide="building-2"></i>
+                            </div>
+                            <div>
+                                <div class="stat-number">500+</div>
+                                <div class="stat-label">Partner Companies</div>
+                            </div>
+                        </div>
 
-        <label>Additional info</label>
-        <textarea name="additional_info"></textarea>
+                        <div class="stat-item">
+                            <div class="stat-icon stat-icon-blue">
+                                <i data-lucide="award"></i>
+                            </div>
+                            <div>
+                                <div class="stat-number">15+ Years</div>
+                                <div class="stat-label">Industry Experience</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <label>Upload Resume (PDF/DOC)</label>
-        <input type="file" name="resume" accept=".pdf,.doc,.docx" required>
+        <!-- About Section -->
+        <section class="about-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Why Choose Jobs Next Door?</h2>
+                    <p class="section-description">
+                        We don't just fill positions – we build careers. As a recruitment marketing company, we act as the trusted middle-man between leading corporates and skilled professionals, ensuring the perfect match for both parties.
+                    </p>
+                </div>
 
-        <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-blue">
+                            <i data-lucide="briefcase"></i>
+                        </div>
+                        <h3 class="feature-title">White-Collar Roles</h3>
+                        <p class="feature-description">
+                            Executive positions, management roles, and professional services across finance, technology, healthcare, and more.
+                        </p>
+                    </div>
 
-        <button type="submit" class="btn send">Send Application</button>
-        <div class="message"></div>
-      </form>
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-green">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <h3 class="feature-title">Grey-Collar Roles</h3>
+                        <p class="feature-description">
+                            Skilled technical positions, IT specialists, healthcare workers, and professionals in hybrid roles.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon feature-icon-orange">
+                            <i data-lucide="building-2"></i>
+                        </div>
+                        <h3 class="feature-title">Blue-Collar Roles</h3>
+                        <p class="feature-description">
+                            Manufacturing, construction, logistics, skilled trades, and essential workforce positions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Application Form Section -->
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2 class="form-title">Apply for a Position</h2>
+                        <p class="form-description">
+                            Fill out the form below to submit your application. We connect talented professionals with leading companies across all industries.
+                        </p>
+                    </div>
+
+                    <form
+    id="jobForm"
+    class="application-form"
+    action="{{ url_for('index') }}"
+    method="POST"
+    enctype="multipart/form-data">
+
+                        <!-- Personal Information -->
+                        <div class="form-section-group">
+                            <h3 class="form-section-title">Personal Information</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="first" class="form-label">First name *</label>
+                                    <input
+                                        type="text"
+                                        id="first"
+                                        name="first_name"
+                                        class="form-input"
+                                        placeholder="First name"
+                                        required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="last" class="form-label">Last name *</label>
+                                    <input
+                                        type="text"
+                                        id="last"
+                                        name="last_name"
+                                        class="form-input"
+                                        placeholder="Last name"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email *</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    class="form-input"
+                                    placeholder="Email"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone" class="form-label">Phone *</label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    class="form-input"
+                                    placeholder="Phone"
+                                    required>
+                            </div>
+                        </div>
+
+                        <!-- Location Information -->
+                        <div class="form-section-group">
+                            <h3 class="form-section-title">Location</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="country" class="form-label">Country *</label>
+                                    <select id="country" name="country" class="form-select" required>
+                                        <option value="">Choose country</option>
+                                        <option>United States</option>
+                                        <option>India</option>
+                                        <option>United Kingdom</option>
+                                        <option>Australia</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="city" class="form-label">City *</label>
+                                    <input
+                                        type="text"
+                                        id="city"
+                                        name="city"
+                                        class="form-input"
+                                        placeholder="City"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address" class="form-label">Address *</label>
+                                <input
+                                    type="text"
+                                    id="address"
+                                    name="address"
+                                    class="form-input"
+                                    placeholder="Address"
+                                    required>
+                            </div>
+                        </div>
+
+                        <!-- Position Information -->
+                        <div class="form-section-group">
+                            <h3 class="form-section-title">Position Details</h3>
+
+                            <div class="form-group">
+                                <label for="position" class="form-label">Position applying for *</label>
+                                <select id="position" name="position" class="form-select" required>
+                                    <option value="">Choose position</option>
+                                    <option>Full Stack Engineer</option>
+                                    <option>Product Manager</option>
+                                    <option>UI/UX Designer</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="info" class="form-label">Additional information</label>
+                                <textarea
+                                    id="info"
+                                    name="additional_info"
+                                    class="form-textarea"
+                                    placeholder="Additional info"
+                                    rows="4"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cv" class="form-label">Resume / CV *</label>
+                                <input
+                                    type="file"
+                                    id="cv"
+                                    name="resume"
+                                    accept=".pdf,.doc,.docx"
+                                    class="file-input"
+                                    required>
+                                <label for="cv" class="file-label" id="fileLabel">
+                                    <i data-lucide="upload" class="file-icon"></i>
+                                    <span id="fileName">Click to upload your resume (PDF, DOC, DOCX)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn reset" id="resetBtn">Reset</button>
+                            <button type="submit" class="btn send" id="submitBtn">
+                                <span id="submitText">Send</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-column">
+                        <div class="footer-brand">
+                            <i data-lucide="briefcase" class="footer-icon"></i>
+                            <span class="footer-brand-text">Jobs Next Door</span>
+                        </div>
+                        <p class="footer-text">
+                            Your trusted partner in recruitment marketing, connecting talent with opportunity since 2010.
+                        </p>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4 class="footer-heading">Contact Us</h4>
+                        <div class="footer-links">
+                            <p>Email: careers@jobsnextdoor.com</p>
+                            <p>Phone: 1-800-JOBS-NOW</p>
+                            <p>Available: Mon-Fri, 9AM-6PM</p>
+                        </div>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4 class="footer-heading">Industries We Serve</h4>
+                        <ul class="footer-links">
+                            <li>Technology & IT</li>
+                            <li>Healthcare & Pharmaceuticals</li>
+                            <li>Manufacturing & Engineering</li>
+                            <li>Finance & Professional Services</li>
+                            <li>Construction & Skilled Trades</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Jobs Next Door. All rights reserved. We are a recruitment marketing company and do not directly employ candidates.</p>
+                </div>
+            </div>
+        </footer>
     </div>
-  </div>
 
-  <script>
-    const form = document.getElementById('jobForm');
-    const progressContainer = document.querySelector('.progress-container');
-    const progressBar = document.querySelector('.progress-bar');
-    const message = document.querySelector('.message');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const data = new FormData(form);
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/apply', true);
-
-      xhr.upload.onloadstart = () => {
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-        message.textContent = '';
-      };
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          progressBar.style.width = percent.toFixed(0) + '%';
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-            // Redirect to Website 1 thank-you page
-            window.location.href = "https://main-web-1.onrender.com/success";
-        } else {
-            message.style.color = 'red';
-            message.textContent = 'Something went wrong. Please try again.';
-        }
-      };
-
-
-      xhr.send(data);
-    });
-  </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
 </body>
 </html>

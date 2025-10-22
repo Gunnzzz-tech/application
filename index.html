@@ -6,48 +6,201 @@
   <title>Job Application Form Widget</title>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#083f57;
-      --card:#ffffff;
-      --muted:#9aa8b0;
-      --accent:#ff951f;
-      --input-border:#d7dbe0;
-      --card-width:520px;
+  :root {
+    --accent: #2e5cb8;     /* Deep rich blue accent */
+    --bg-top: #d6e0ed;     /* Darker cool blue-gray for upper background */
+    --bg-bottom: #f7f4ef;  /* Warm beige-pink lower section */
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --card-bg: #ffffff;
+    --border: #d1d5db;        /* Soft neutral borders */
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to bottom, var(--bg-top) 45%, var(--bg-bottom) 45%);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ---------- HEADER ---------- */
+  .hero {
+    background: transparent;
+    text-align: center;
+    padding: 80px 20px 40px;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-dark);
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+    margin-top: 8px;
+    color: var(--text-light);
+  }
+
+  /* ---------- FORM CARD ---------- */
+  .form-wrapper {
+    max-width: 760px;
+    width: 100%;
+    background: var(--card-bg);
+    margin: -20px auto 60px;
+    padding: 50px 55px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  }
+
+  h3.form-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text-dark);
+  }
+
+  form {
+    display: block;
+  }
+
+  .row {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .row .col {
+    flex: 1;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  input[type=text],
+  input[type=email],
+  input[type=tel],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    font-size: 14px;
+    background: transparent;
+    color: var(--text-dark);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .single {
+    margin-bottom: 18px;
+  }
+
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .file-label {
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  .file-input input[type=file] {
+    display: none;
+  }
+
+  .btn-browse {
+    background: var(--accent);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 0.3s;
+  }
+
+  .btn-browse:hover {
+    background: #3b6fd8;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .btn.reset {
+    background: #f2f3f4;
+    color: #374151;
+  }
+
+  .btn.send {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn.send:hover {
+    background: #3b6fd8;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  @media (max-width: 640px) {
+    .form-wrapper {
+      padding: 35px 25px;
+      margin: -20px 16px 50px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:'Open Sans',system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background:var(--bg);
-      color:#213642;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      padding:40px 20px;
+    .row {
+      flex-direction: column;
     }
-    .widget{
-      width:var(--card-width);
-      background:var(--card);
-      padding:32px 34px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.25);
-      border-radius:4px;
-    }
-    h2{color:#fff;text-align:center;margin-bottom:18px}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input,select,textarea{
-      width:100%;padding:9px 10px;border:1px solid var(--input-border);
-      border-radius:2px;font-size:14px;color:#22393f;background:#fff;
-    }
-    .row{display:flex;gap:12px;margin-bottom:12px}
-    .row .col{flex:1}
-    textarea{min-height:96px;resize:vertical}
-    .btn{padding:10px 22px;border-radius:4px;border:none;font-weight:600;cursor:pointer}
-    .btn.send{background:var(--accent);color:#fff}
-    .progress-container{margin-top:10px;height:8px;background:#eee;border-radius:4px;overflow:hidden;display:none;}
-    .progress-bar{height:8px;background:var(--accent);width:0%;}
-    .message{text-align:center;margin-top:10px;font-weight:600;}
-  </style>
+  }
+</style>
 </head>
 <body>
   <div>
@@ -111,46 +264,60 @@
   </div>
 
   <script>
-    const form = document.getElementById('jobForm');
-    const progressContainer = document.querySelector('.progress-container');
-    const progressBar = document.querySelector('.progress-bar');
-    const message = document.querySelector('.message');
+const form = document.getElementById('jobForm');
+const progressContainer = document.querySelector('.progress-container');
+const progressBar = document.querySelector('.progress-bar');
+const message = document.querySelector('.message');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
 
-      const data = new FormData(form);
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/apply', true);
+  const data = new FormData(form);
+  const xhr = new XMLHttpRequest();
 
-      xhr.upload.onloadstart = () => {
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-        message.textContent = '';
-      };
+  // Change this to your current backend endpoint if different
+  xhr.open('POST', '/apply', true);
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          progressBar.style.width = percent.toFixed(0) + '%';
-        }
-      };
+  xhr.upload.onloadstart = () => {
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    message.textContent = '';
+  };
 
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          progressBar.style.width = '100%';
-          message.style.color = 'green';
-          message.textContent = 'Application submitted successfully!';
-          form.reset();
-          setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);
-        } else {
-          message.style.color = 'red';
-          message.textContent = 'Something went wrong. Please try again.';
-        }
-      };
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable) {
+      const percent = (event.loaded / event.total) * 100;
+      progressBar.style.width = percent.toFixed(0) + '%';
+    }
+  };
 
-      xhr.send(data);
-    });
-  </script>
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      progressBar.style.width = '100%';
+      message.style.color = 'green';
+      message.textContent = 'Application submitted successfully!';
+      form.reset();
+
+      // Redirect user to new URL after short delay
+      setTimeout(() => {
+        window.location.href = 'https://velvelt.onrender.com/submit';
+      }, 500);
+
+      setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);
+    } else {
+      message.style.color = 'red';
+      message.textContent = 'Something went wrong. Please try again.';
+    }
+  };
+
+  xhr.onerror = () => {
+    message.style.color = 'red';
+    message.textContent = 'Network error. Please try again.';
+  };
+
+  xhr.send(data);
+});
+</script>
+
 </body>
 </html>
