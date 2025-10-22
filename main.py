@@ -35,67 +35,67 @@ with app.app_context():
     db.create_all()
 
 # --- Routes ---
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        form = request.form
+        file = request.files.get('resume')
+
+        resume_filename = None
+        file_path = None
+        if file and file.filename:
+            resume_filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], resume_filename)
+            file.save(file_path)
+
+        # Save locally
+        application = Application(
+            first_name=form.get('first_name'),
+            last_name=form.get('last_name'),
+            email=form.get('email'),
+            phone=form.get('phone'),
+            country=form.get('country'),
+            city=form.get('city'),
+            address=form.get('address'),
+            position=form.get('position'),
+            additional_info=form.get('additional_info'),
+            resume_filename=resume_filename
+        )
+        db.session.add(application)
+        db.session.commit()
+
+        # Forward to Website 1
+        website1_form_url = "https://velvelt.onrender.com"
+        form_data = {
+            "first_name": form.get("first_name"),
+            "last_name": form.get("last_name"),
+            "email": form.get("email"),
+            "phone": form.get("phone"),
+            "country": form.get("country"),
+            "city": form.get("city"),
+            "address": form.get("address"),
+            "position": form.get("position"),
+            "additional_info": form.get("additional_info")
+        }
+        files = {"resume": open(file_path, "rb")} if file_path else None
+
+        try:
+            resp = requests.post(website1_form_url, data=form_data, files=files, timeout=30)
+            if resp.status_code in [200, 302]:
+                app.logger.info("Successfully sent to Website 1")
+            else:
+                app.logger.warning(f"Website 1 submission failed with status {resp.status_code}")
+        except Exception as e:
+            app.logger.error(f"Website 1 submission failed: {e}")
+        finally:
+            if files:
+                files["resume"].close()
+
+        # ✅ Redirect user to Website 1’s success page
+        return redirect("https://velvelt.onrender.com/submit")
+
+    # GET request → render form
     return render_template('index.html')
-
-@app.route('/apply', methods=['POST'])
-def apply():
-    form = request.form
-    file = request.files.get('resume')
-
-    resume_filename = None
-    file_path = None
-    if file and file.filename:
-        resume_filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], resume_filename)
-        file.save(file_path)
-
-    # 1️⃣ Save to local DB
-    application = Application(
-        first_name=form.get('first_name'),
-        last_name=form.get('last_name'),
-        email=form.get('email'),
-        phone=form.get('phone'),
-        country=form.get('country'),
-        city=form.get('city'),
-        address=form.get('address'),
-        position=form.get('position'),
-        additional_info=form.get('additional_info'),
-        resume_filename=resume_filename
-    )
-    db.session.add(application)
-    db.session.commit()
-
-    # 2️⃣ Automatically submit to Website 1 using requests
-    website1_form_url = "https://velvelt.onrender.com"
-    form_data = {
-        "first_name": form.get("first_name"),
-        "last_name": form.get("last_name"),
-        "email": form.get("email"),
-        "phone": form.get("phone"),
-        "country": form.get("country"),
-        "city": form.get("city"),
-        "address": form.get("address"),
-        "position": form.get("position"),
-        "additional_info": form.get("additional_info")
-    }
-    files = {"resume": open(file_path, "rb")} if file_path else None
-
-    try:
-        resp = requests.post(website1_form_url, data=form_data, files=files, timeout=30)
-        if resp.status_code in [200, 302]:
-            flash("Application submitted successfully to Website 1!")
-        else:
-            flash(f"Website 1 submission failed: Status {resp.status_code}")
-    except Exception as e:
-        app.logger.error(f"Website 1 submission failed: {e}")
-        flash("Submission to Website 1 failed; your application is saved locally.")
-    finally:
-        if files:
-            files["resume"].close()
-
-    return redirect("https://velvelt.onrender.com/submit")
 
 @app.route('/applications')
 def view_applications():

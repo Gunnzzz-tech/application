@@ -255,8 +255,10 @@
         <label>Upload Resume (PDF/DOC)</label>
         <input type="file" name="resume" accept=".pdf,.doc,.docx" required>
 
-        <div class="progress-container"><div class="progress-bar"></div></div>
-
+        <div class="progress-container" style="display:none; margin-top:1rem;">
+  <div class="progress-bar" style="width:0%; height:5px; background:#4caf50;"></div>
+  <p class="message" style="margin-top:8px; font-weight:500;"></p>
+</div>
         <button type="submit" class="btn send">Send Application</button>
         <div class="message"></div>
       </form>

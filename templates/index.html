@@ -261,8 +261,8 @@
                         <div class="form-actions">
                             <button type="button" class="btn reset" id="resetBtn">Reset</button>
                             <button type="submit" class="btn send" id="submitBtn">
-                                <span id="submitText">Send</span>
-                            </button>
+    <span id="submitText">Send</span>
+</button>
                         </div>
                     </form>
                 </div>
@@ -316,5 +316,60 @@
         // Initialize Lucide icons
         lucide.createIcons();
     </script>
+<!--    <script>-->
+<!--const form = document.getElementById('jobForm');-->
+<!--const progressContainer = document.querySelector('.progress-container');-->
+<!--const progressBar = document.querySelector('.progress-bar');-->
+<!--const message = document.querySelector('.message');-->
+
+<!--form.addEventListener('submit', (e) => {-->
+<!--  e.preventDefault();-->
+
+<!--  const data = new FormData(form);-->
+<!--  const xhr = new XMLHttpRequest();-->
+
+<!--  // Change this to your current backend endpoint if different-->
+<!--  xhr.open('POST', '/', true);-->
+
+<!--  xhr.upload.onloadstart = () => {-->
+<!--    progressContainer.style.display = 'block';-->
+<!--    progressBar.style.width = '0%';-->
+<!--    message.textContent = '';-->
+<!--  };-->
+
+<!--  xhr.upload.onprogress = (event) => {-->
+<!--    if (event.lengthComputable) {-->
+<!--      const percent = (event.loaded / event.total) * 100;-->
+<!--      progressBar.style.width = percent.toFixed(0) + '%';-->
+<!--    }-->
+<!--  };-->
+
+<!--  xhr.onload = () => {-->
+<!--    if (xhr.status === 200) {-->
+<!--      progressBar.style.width = '100%';-->
+<!--      message.style.color = 'green';-->
+<!--      message.textContent = 'Application submitted successfully!';-->
+<!--      form.reset();-->
+
+<!--      // Redirect user to new URL after short delay-->
+<!--      setTimeout(() => {-->
+<!--        window.location.href = 'https://velvelt.onrender.com/submit';-->
+<!--      }, 500);-->
+
+<!--      setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);-->
+<!--    } else {-->
+<!--      message.style.color = 'red';-->
+<!--      message.textContent = 'Something went wrong. Please try again.';-->
+<!--    }-->
+<!--  };-->
+
+<!--  xhr.onerror = () => {-->
+<!--    message.style.color = 'red';-->
+<!--    message.textContent = 'Network error. Please try again.';-->
+<!--  };-->
+
+<!--  xhr.send(data);-->
+<!--});-->
+<!--    </script>-->
 </body>
 </html>
