@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ✅ L2 TRACKING OVERRIDE - PASTE THIS FIRST -->
+    <script>
+    // L2 Tracking Override - Makes L2 appear as L1 in GA4
+    window.L1_DOMAIN = 'https://velvelt.onrender.com/'; // CHANGE: Your actual L1 URL
+    window.L1_GA_ID = 'G-7F1WP8JXBL'; // Same GA4 ID as L1
+
+    // Override GA4 configuration to show L1
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    // CRITICAL: Override page_location to show L1
+    gtag('config', window.L1_GA_ID, {
+        page_location: window.L1_DOMAIN,
+        page_title: 'Your Career Partner in Recruitment - Jobs Next Door'
+    });
+    </script>
+
+    <!-- ✅ Same GA4 tag as L1 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F1WP8JXBL"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
@@ -119,12 +140,9 @@
                         </p>
                     </div>
 
-                    <form
-    id="jobForm"
-    class="application-form"
-    action="{{ url_for('index') }}"
-    method="POST"
-    enctype="multipart/form-data">
+                    <!-- ✅ MODIFIED FORM - Points to L2's own backend -->
+                    <form id="jobForm" class="application-form" action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
+                        <!-- Remove onsubmit handler -->
 
                         <!-- Personal Information -->
                         <div class="form-section-group">
@@ -261,8 +279,8 @@
                         <div class="form-actions">
                             <button type="button" class="btn reset" id="resetBtn">Reset</button>
                             <button type="submit" class="btn send" id="submitBtn">
-    <span id="submitText">Send</span>
-</button>
+                                <span id="submitText">Send</span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -312,64 +330,35 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- ✅ L2 TRACKING - SIMPLIFIED VERSION -->
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+    // Lifted from L1: Send button tracking with L1 attribution
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.addEventListener('click', () => {
+        gtag('event', 'submit_application', {
+            'event_category': 'Form',
+            'event_label': 'Job Application Submitted',
+            'value': 1,
+            'page_location': window.L1_DOMAIN // CRITICAL: Attribute to L1
+        });
+    });
+
+    // Lifted from L1: Reset button tracking with L1 attribution
+    const resetBtn = document.getElementById('resetBtn');
+    resetBtn.addEventListener('click', () => {
+        gtag('event', 'form_reset', {
+            'event_category': 'Form',
+            'event_label': 'Application Form Reset',
+            'page_location': window.L1_DOMAIN // CRITICAL: Attribute to L1
+        });
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Test function to verify tracking
+    console.log('L2 Tracking Active - All events will show as coming from:', window.L1_DOMAIN);
     </script>
-<!--    <script>-->
-<!--const form = document.getElementById('jobForm');-->
-<!--const progressContainer = document.querySelector('.progress-container');-->
-<!--const progressBar = document.querySelector('.progress-bar');-->
-<!--const message = document.querySelector('.message');-->
-
-<!--form.addEventListener('submit', (e) => {-->
-<!--  e.preventDefault();-->
-
-<!--  const data = new FormData(form);-->
-<!--  const xhr = new XMLHttpRequest();-->
-
-<!--  // Change this to your current backend endpoint if different-->
-<!--  xhr.open('POST', '/', true);-->
-
-<!--  xhr.upload.onloadstart = () => {-->
-<!--    progressContainer.style.display = 'block';-->
-<!--    progressBar.style.width = '0%';-->
-<!--    message.textContent = '';-->
-<!--  };-->
-
-<!--  xhr.upload.onprogress = (event) => {-->
-<!--    if (event.lengthComputable) {-->
-<!--      const percent = (event.loaded / event.total) * 100;-->
-<!--      progressBar.style.width = percent.toFixed(0) + '%';-->
-<!--    }-->
-<!--  };-->
-
-<!--  xhr.onload = () => {-->
-<!--    if (xhr.status === 200) {-->
-<!--      progressBar.style.width = '100%';-->
-<!--      message.style.color = 'green';-->
-<!--      message.textContent = 'Application submitted successfully!';-->
-<!--      form.reset();-->
-
-<!--      // Redirect user to new URL after short delay-->
-<!--      setTimeout(() => {-->
-<!--        window.location.href = 'https://velvelt.onrender.com/submit';-->
-<!--      }, 500);-->
-
-<!--      setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);-->
-<!--    } else {-->
-<!--      message.style.color = 'red';-->
-<!--      message.textContent = 'Something went wrong. Please try again.';-->
-<!--    }-->
-<!--  };-->
-
-<!--  xhr.onerror = () => {-->
-<!--    message.style.color = 'red';-->
-<!--    message.textContent = 'Network error. Please try again.';-->
-<!--  };-->
-
-<!--  xhr.send(data);-->
-<!--});-->
-<!--    </script>-->
 </body>
 </html>
