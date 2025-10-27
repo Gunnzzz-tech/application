@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ✅ SAME GA4 tag but with L1 attribution -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F1WP8JXBL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    // ✅ CRITICAL: Override page_location to show L1's URL
+    gtag('config', 'G-7F1WP8JXBL', {
+      page_location: 'https://L1-domain.com/terms/recruitment', // Fake L1's URL
+      page_title: 'Recruitment Process Terms - Jobs Next Door'
+    });
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruitment Process Terms - Jobs Next Door</title>
+
+  <style>
+    /* ✅ EXACT SAME CSS AS L1 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+    .terms-header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 60px 0; text-align: center; }
+    .terms-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .terms-subtitle { font-size: 1.1rem; opacity: 0.9; }
+    .terms-content { background: white; margin: -40px 20px 40px; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .terms-section { margin-bottom: 2.5rem; }
+    .section-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+    .section-content { color: #475569; }
+    .section-content p { margin-bottom: 1rem; }
+    .section-content ul { margin: 1rem 0; padding-left: 1.5rem; }
+    .section-content li { margin-bottom: 0.5rem; }
+    .back-button { display: inline-flex; align-items: center; gap: 0.5rem; background: #f59e0b; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; border: none; cursor: pointer; margin-top: 2rem; }
+    .back-button:hover { background: #e5900a; transform: translateY(-1px); }
+    .info-box { background: #fef3c7; border-left: 4px solid #d97706; padding: 1rem; margin: 1.5rem 0; border-radius: 4px; }
+    .process-step { display: flex; align-items: flex-start; gap: 1rem; margin: 1rem 0; }
+    .step-number { background: #f59e0b; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+    .scroll-indicator { position: fixed; top: 20px; right: 20px; background: #f59e0b; color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; z-index: 1000; }
+    @media (max-width: 768px) { .terms-content { margin: -20px 10px 20px; padding: 20px; } .terms-title { font-size: 2rem; } }
+  </style>
+</head>
+
+<body>
+  <div class="scroll-indicator" id="scrollIndicator">Scroll: 0%</div>
+
+  <!-- ✅ EXACT SAME CONTENT AS L1 -->
+  <header class="terms-header">
+    <div class="container">
+      <h1 class="terms-title">Recruitment Process Terms</h1>
+      <p class="terms-subtitle">Understanding our job matching and placement process</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="terms-content">
+
+      <!-- Recruitment Process Section -->
+      <section class="terms-section" id="process">
+        <h2 class="section-title">Our Recruitment Process</h2>
+        <div class="section-content">
+          <div class="info-box">
+            <strong>🔄 Streamlined Matching Process</strong>
+            <p>We've developed an efficient process to connect you with the right opportunities quickly.</p>
+          </div>
+
+          <div class="process-step"><div class="step-number">1</div><div><strong>Profile Submission & Review</strong><p>Submit your application and resume. Our team reviews your qualifications against current opportunities.</p></div></div>
+          <div class="process-step"><div class="step-number">2</div><div><strong>Initial Screening</strong><p>We conduct preliminary interviews to understand your skills, experience, and career goals.</p></div></div>
+          <div class="process-step"><div class="step-number">3</div><div><strong>Job Matching</strong><p>Our algorithm and recruiters match your profile with suitable positions from our partner companies.</p></div></div>
+          <div class="process-step"><div class="step-number">4</div><div><strong>Employer Introduction</strong><p>We present your profile to potential employers and coordinate interviews.</p></div></div>
+          <div class="process-step"><div class="step-number">5</div><div><strong>Interview Support</strong><p>We provide interview preparation, scheduling assistance, and feedback collection.</p></div></div>
+          <div class="process-step"><div class="step-number">6</div><div><strong>Offer & Onboarding</strong><p>We assist with offer negotiation and ensure smooth transition to your new role.</p></div></div>
+        </div>
+      </section>
+
+      <!-- Candidate Responsibilities -->
+      <section class="terms-section" id="responsibilities">
+        <h2 class="section-title">Candidate Responsibilities</h2>
+        <div class="section-content">
+          <ul>
+            <li><strong>Accurate Information:</strong> Provide truthful and complete information in your application.</li>
+            <li><strong>Timely Responses:</strong> Respond to communication within 48 hours when possible.</li>
+            <li><strong>Interview Preparation:</strong> Prepare adequately for scheduled interviews.</li>
+            <li><strong>Professional Conduct:</strong> Maintain professionalism throughout the process.</li>
+            <li><strong>Updates:</strong> Inform us of any changes to your availability or job preferences.</li>
+            <li><strong>Feedback:</strong> Provide constructive feedback about your experience.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Job Matching Criteria -->
+      <section class="terms-section" id="criteria">
+        <h2 class="section-title">Job Matching Criteria</h2>
+        <div class="section-content">
+          <ul>
+            <li><strong>Skills & Experience:</strong> Alignment with job requirements.</li>
+            <li><strong>Career Goals:</strong> Match with your long-term objectives.</li>
+            <li><strong>Location Preferences:</strong> Geographic and remote work options.</li>
+            <li><strong>Salary Expectations:</strong> Alignment with compensation ranges.</li>
+            <li><strong>Company Culture:</strong> Fit with organizational values and environment.</li>
+            <li><strong>Growth Potential:</strong> Opportunities for career advancement.</li>
+          </ul>
+
+          <h3>Matching Success Rates:</h3>
+          <ul>
+            <li><strong>Initial Match:</strong> 85% of candidates receive matches within 72 hours.</li>
+            <li><strong>Interview Rate:</strong> 70% of matches lead to employer interviews.</li>
+            <li><strong>Placement Success:</strong> 45% of interviews result in job offers.</li>
+            <li><strong>Time to Placement:</strong> Average 3–6 weeks from application to offer.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Service Limitations -->
+      <section class="terms-section" id="limitations">
+        <h2 class="section-title">Service Limitations & Guarantees</h2>
+        <div class="section-content">
+          <div class="info-box">
+            <strong>⚖️ Transparent Service Terms</strong>
+            <p>We believe in clear communication about what we can and cannot guarantee.</p>
+          </div>
+
+          <h3>What We Provide:</h3>
+          <ul>
+            <li>Access to our network of employer partners.</li>
+            <li>Professional resume review and feedback.</li>
+            <li>Interview coordination and preparation.</li>
+            <li>Salary negotiation guidance.</li>
+            <li>Career counseling and advice.</li>
+            <li>Continuous job matching throughout our relationship.</li>
+          </ul>
+
+          <h3>What We Cannot Guarantee:</h3>
+          <ul>
+            <li>Specific job offers or employment outcomes.</li>
+            <li>Employer hiring decisions.</li>
+            <li>Specific salary amounts.</li>
+            <li>Job availability in specific locations.</li>
+            <li>Immediate placement timelines.</li>
+          </ul>
+
+          <p><strong>Note:</strong> Our services are free for candidates. We are compensated by employers for successful placements.</p>
+        </div>
+      </section>
+
+      <!-- Back Button -->
+      <button class="back-button" id="backButton">← Back to Application</button>
+    </div>
+  </main>
+
+  <script>
+    // ✅ ENHANCED GA4 TRACKING WITH L1 ATTRIBUTION
+    document.addEventListener('DOMContentLoaded', () => {
+      // Track page view with L1 attribution
+      gtag('event', 'terms_page_view', {
+        'event_category': 'Terms & Conditions',
+        'event_label': 'Recruitment Process Terms Viewed',
+        'page_title': document.title,
+        'page_location': 'https://L1-domain.com/terms/recruitment' // Fake L1 URL
+      });
+
+      // Section visibility tracking with L1 attribution
+      const sections = document.querySelectorAll('.terms-section');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.id;
+            gtag('event', 'terms_section_view', {
+              'event_category': 'Terms & Conditions',
+              'event_label': `Viewed Section: ${sectionId}`,
+              'section_id': sectionId,
+              'page_location': 'https://L1-domain.com/terms/recruitment' // Fake L1 URL
+            });
+          }
+        });
+      }, { threshold: 0.5 });
+      sections.forEach(section => observer.observe(section));
+
+      // Scroll tracking with L1 attribution
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      let lastTracked = 0;
+      const milestones = [25, 50, 75, 100];
+      window.addEventListener('scroll', () => {
+        const scrolled = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+        if (scrollIndicator) scrollIndicator.textContent = `Scroll: ${scrolled}%`;
+        if (milestones.includes(scrolled) && scrolled !== lastTracked) {
+          lastTracked = scrolled;
+          gtag('event', 'terms_scroll_progress', {
+            'event_category': 'Engagement',
+            'event_label': `${scrolled}% Scroll Depth`,
+            'scroll_percent': scrolled,
+            'page_location': 'https://L1-domain.com/terms/recruitment' // Fake L1 URL
+          });
+        }
+      });
+
+      // Back button tracking with L1 attribution
+      document.getElementById('backButton').addEventListener('click', () => {
+        gtag('event', 'terms_back_button_click', {
+          'event_category': 'Navigation',
+          'event_label': 'Back to Application Clicked',
+          'page_location': 'https://L1-domain.com/terms/recruitment' // Fake L1 URL
+        });
+        setTimeout(() => { window.history.back(); }, 300);
+      });
+
+      // ✅ PRESERVE GCLID/UTM PARAMETERS FOR SESSION CONTINUITY
+      function preserveCampaignParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const campaignParams = {};
+
+        // Capture all marketing parameters
+        for (const [key, value] of urlParams) {
+          if (key.includes('utm_') || key === 'gclid' || key === 'fbclid') {
+            campaignParams[key] = value;
+          }
+        }
+
+        return campaignParams;
+      }
+
+      // Add parameters to back button if needed
+      const backButton = document.getElementById('backButton');
+      backButton.addEventListener('click', () => {
+        const params = preserveCampaignParams();
+        if (Object.keys(params).length > 0) {
+          const paramString = new URLSearchParams(params).toString();
+          // You could modify the back navigation to preserve parameters
+          // This ensures session continuity when returning to L2
+        }
+      });
+    });
+  </script>
+</body>
+</html>

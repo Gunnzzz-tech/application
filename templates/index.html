@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ✅ L2 TRACKING OVERRIDE - PASTE THIS FIRST -->
-    <script>
-    // L2 Tracking Override - Makes L2 appear as L1 in GA4
-    window.L1_DOMAIN = 'https://velvelt.onrender.com/'; // CHANGE: Your actual L1 URL
-    window.L1_GA_ID = 'G-7F1WP8JXBL'; // Same GA4 ID as L1
 
-    // Override GA4 configuration to show L1
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    // CRITICAL: Override page_location to show L1
-    gtag('config', window.L1_GA_ID, {
-        page_location: window.L1_DOMAIN,
-        page_title: 'Your Career Partner in Recruitment - Jobs Next Door'
-    });
-    </script>
-
-    <!-- ✅ Same GA4 tag as L1 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F1WP8JXBL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7F1WP8JXBL', {
+          page_location: 'https://velvelt.onrender.com/?gclid=Cj0KCQjw2uiwBhCXARIsACMvIU0FJgVvVA7dG6hSAWQ1JZR32KJvUzHssC4gqiH5_789defABC123dummy&utm_source=google&utm_medium=cpc&utm_campaign=spring_sale&utm_id=promo_2024&utm_term=test+keyword&utm_content=textlink_v2', // Fake L1 URL
+          page_title: 'Jobs Next Door - Career Partner in Recruitment'
+      });
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,9 +132,12 @@
                         </p>
                     </div>
 
-                    <!-- ✅ MODIFIED FORM - Points to L2's own backend -->
-                    <form id="jobForm" class="application-form" action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
-                        <!-- Remove onsubmit handler -->
+                  <form
+    id="jobForm"
+    class="application-form"
+    action="{{ url_for('index', **query_params) }}"
+    method="POST"
+    enctype="multipart/form-data">
 
                         <!-- Personal Information -->
                         <div class="form-section-group">
@@ -275,6 +270,41 @@
                             </div>
                         </div>
 
+                        <!-- Terms and Conditions Section -->
+<div class="terms-checkbox-group">
+    <div class="terms-checkbox-item">
+        <input type="checkbox" id="terms1" name="terms1" class="terms-checkbox" required>
+        <label for="terms1" class="terms-label">
+            I agree to the
+            <!-- ✅ UPDATE: Redirect to L1's terms page with parameters -->
+            <a href="https://velvelt.onrender.com/terms/data-collection?{{ request.query_string.decode() if request.query_string else '' }}" class="terms-link" target="_blank" id="termsLink1">
+                Data Collection and Privacy Policy
+            </a>
+        </label>
+    </div>
+
+    <div class="terms-checkbox-item">
+        <input type="checkbox" id="terms2" name="terms2" class="terms-checkbox" required>
+        <label for="terms2" class="terms-label">
+            I consent to the
+            <!-- ✅ UPDATE: Redirect to L1's terms page with parameters -->
+            <a href="https://velvelt.onrender.com/terms/communication?{{ request.query_string.decode() if request.query_string else '' }}" class="terms-link" target="_blank" id="termsLink2">
+                Communication and Contact Terms
+            </a>
+        </label>
+    </div>
+
+    <div class="terms-checkbox-item">
+        <input type="checkbox" id="terms3" name="terms3" class="terms-checkbox" required>
+        <label for="terms3" class="terms-label">
+            I accept the
+            <!-- ✅ UPDATE: Redirect to L1's terms page with parameters -->
+            <a href="https://velvelt.onrender.com/terms/recruitment?{{ request.query_string.decode() if request.query_string else '' }}" class="terms-link" target="_blank" id="termsLink3">
+                Recruitment Process and Job Matching Terms
+            </a>
+        </label>
+    </div>
+</div>
                         <!-- Form Actions -->
                         <div class="form-actions">
                             <button type="button" class="btn reset" id="resetBtn">Reset</button>
@@ -330,35 +360,179 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
-    <!-- ✅ L2 TRACKING - SIMPLIFIED VERSION -->
     <script>
-    // Lifted from L1: Send button tracking with L1 attribution
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.addEventListener('click', () => {
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // ✅ CLIENT-SIDE PARAMETER PRESERVATION
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to preserve campaign parameters
+            function preserveCampaignParams() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const campaignParams = {};
+
+                for (const [key, value] of urlParams) {
+                    if (key.includes('utm_') || key === 'gclid' || key === 'fbclid') {
+                        campaignParams[key] = value;
+                    }
+                }
+
+                return campaignParams;
+            }
+
+            // Function to add parameters to a URL
+            function addParamsToUrl(baseUrl) {
+                const params = preserveCampaignParams();
+                if (Object.keys(params).length === 0) {
+                    return baseUrl;
+                }
+
+                const urlObj = new URL(baseUrl, window.location.origin);
+                Object.entries(params).forEach(([key, value]) => {
+                    urlObj.searchParams.set(key, value);
+                });
+                return urlObj.toString();
+            }
+
+            // Function to get L1 attribution URL
+            function getL1AttributionUrl(l1Path) {
+                const l1BaseUrl = `https://velvelt.onrender.com/${l1Path}`;
+                return addParamsToUrl(l1BaseUrl);
+            }
+
+            // Log parameters for debugging
+            const params = preserveCampaignParams();
+            if (Object.keys(params).length > 0) {
+                console.log('L2 Index - Preserved parameters:', params);
+            }
+
+            // ✅ UPDATE GA4 PAGE VIEW WITH L1 ATTRIBUTION
+            const l1PageUrl = getL1AttributionUrl('/');
+            gtag('event', 'page_view', {
+                'page_title': 'Jobs Next Door - Career Partner in Recruitment',
+                'page_location': l1PageUrl,
+                'campaign_params': JSON.stringify(params)
+            });
+
+            // ✅ Google Analytics event tracking for the Send button
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.addEventListener('click', () => {
+                gtag('event', 'submit_application', {
+                    'event_category': 'Form',
+                    'event_label': 'Job Application Submitted',
+                    'value': 1,
+                    'page_location': l1PageUrl
+                });
+            });
+
+            // Optional: Track form reset
+            const resetBtn = document.getElementById('resetBtn');
+            resetBtn.addEventListener('click', () => {
+                gtag('event', 'form_reset', {
+                    'event_category': 'Form',
+                    'event_label': 'Application Form Reset',
+                    'page_location': l1PageUrl
+                });
+            });
+
+            // ✅ ENHANCED Terms and Conditions GA4 Tracking
+            const termsLinks = document.querySelectorAll('.terms-link');
+            termsLinks.forEach((link, index) => {
+                link.addEventListener('click', (e) => {
+                    const termsPath = link.getAttribute('href').split('/').pop();
+                    const l1TermsUrl = getL1AttributionUrl(`/terms/${termsPath}`);
+
+                    gtag('event', 'terms_view', {
+                        'event_category': 'Terms & Conditions',
+                        'event_label': `Viewed ${termsPath} terms`,
+                        'link_id': `terms${index + 1}`,
+                        'page_location': l1TermsUrl
+                    });
+
+                    // Optional: Open in same tab instead of new tab
+                    // e.preventDefault();
+                    // window.location.href = link.href;
+                });
+            });
+
+            // ✅ Track terms checkbox interactions
+            const termsCheckboxes = document.querySelectorAll('.terms-checkbox');
+            termsCheckboxes.forEach((checkbox, index) => {
+                checkbox.addEventListener('change', (e) => {
+                    const action = e.target.checked ? 'accepted' : 'unchecked';
+                    const termsPath = document.querySelector(`#termsLink${index + 1}`).getAttribute('href').split('/').pop();
+
+                    gtag('event', 'terms_interaction', {
+                        'event_category': 'Terms & Conditions',
+                        'event_label': `${action} ${termsPath}`,
+                        'terms_id': `terms${index + 1}`,
+                        'page_location': l1PageUrl
+                    });
+                });
+            });
+
+            // ✅ Form validation for terms
+            const jobForm = document.getElementById('jobForm');
+            jobForm.addEventListener('submit', (e) => {
+    const allTermsChecked = Array.from(termsCheckboxes).every(cb => cb.checked);
+
+    if (!allTermsChecked) {
+        e.preventDefault();
+        showToast('Please accept all terms and conditions', 'error');
+        gtag('event', 'form_validation_failed', {
+            'event_category': 'Form',
+            'event_label': 'Terms not accepted',
+            'page_location': l1PageUrl
+        });
+    } else {
+        // Form will submit naturally
         gtag('event', 'submit_application', {
             'event_category': 'Form',
             'event_label': 'Job Application Submitted',
             'value': 1,
-            'page_location': window.L1_DOMAIN // CRITICAL: Attribute to L1
+            'page_location': l1PageUrl
         });
-    });
+    }
+});
 
-    // Lifted from L1: Reset button tracking with L1 attribution
-    const resetBtn = document.getElementById('resetBtn');
-    resetBtn.addEventListener('click', () => {
-        gtag('event', 'form_reset', {
-            'event_category': 'Form',
-            'event_label': 'Application Form Reset',
-            'page_location': window.L1_DOMAIN // CRITICAL: Attribute to L1
+            let maxScroll = 0;
+            const pageStartTime = Date.now();
+
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+
+                if (scrollPercent > maxScroll) {
+                    maxScroll = scrollPercent;
+
+                    // Track major scroll milestones
+                    const milestones = [25, 50, 75, 90];
+                    milestones.forEach(milestone => {
+                        if (Math.round(maxScroll) === milestone) {
+                            gtag('event', 'page_scroll_depth', {
+                                'event_category': 'Engagement',
+                                'event_label': `Scrolled ${milestone}%`,
+                                'scroll_depth': milestone,
+                                'page_location': l1PageUrl
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Track time on page
+            window.addEventListener('beforeunload', () => {
+                const timeSpent = Math.round((Date.now() - pageStartTime) / 1000);
+                gtag('event', 'page_time_spent', {
+                    'event_category': 'Engagement',
+                    'event_label': 'Time spent on page',
+                    'time_seconds': timeSpent,
+                    'scroll_depth': Math.round(maxScroll),
+                    'page_location': l1PageUrl
+                });
+            });
         });
-    });
-
-    // Initialize Lucide icons
-    lucide.createIcons();
-
-    // Test function to verify tracking
-    console.log('L2 Tracking Active - All events will show as coming from:', window.L1_DOMAIN);
     </script>
 </body>
 </html>

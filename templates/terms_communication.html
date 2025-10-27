@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ✅ Google Analytics 4 with L1 Attribution -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F1WP8JXBL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      // ✅ CRITICAL: Override page_location to show L1's URL
+      gtag('config', 'G-7F1WP8JXBL', {
+          page_location: 'https://L1-domain.com/terms/communication',
+          page_title: 'Communication Terms - Jobs Next Door'
+      });
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Terms - Jobs Next Door</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
+        .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+        .terms-header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 60px 0; text-align: center; }
+        .terms-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .terms-subtitle { font-size: 1.1rem; opacity: 0.9; }
+        .terms-content { background: white; margin: -40px 20px 40px; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .terms-section { margin-bottom: 2.5rem; }
+        .section-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+        .section-content { color: #475569; }
+        .section-content p { margin-bottom: 1rem; }
+        .section-content ul { margin: 1rem 0; padding-left: 1.5rem; }
+        .section-content li { margin-bottom: 0.5rem; }
+        .back-button { display: inline-flex; align-items: center; gap: 0.5rem; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; border: none; cursor: pointer; margin-top: 2rem; }
+        .back-button:hover { background: #0da271; transform: translateY(-1px); }
+        .highlight { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+        .info-box { background: #d1fae5; border-left: 4px solid #059669; padding: 1rem; margin: 1.5rem 0; border-radius: 4px; }
+        .contact-method { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .contact-method:hover { background: #f8fafc; }
+        .scroll-indicator { position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; z-index: 1000; }
+        @media (max-width: 768px) { .terms-content { margin: -20px 10px 20px; padding: 20px; } .terms-title { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+    <!-- ✅ Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator">Scroll: 0%</div>
+
+    <header class="terms-header">
+        <div class="container">
+            <h1 class="terms-title">Communication & Contact Terms</h1>
+            <p class="terms-subtitle">How we communicate with you and manage your preferences</p>
+        </div>
+    </header>
+    <main class="container">
+        <div class="terms-content">
+            <section class="terms-section" id="communication-methods">
+                <h2 class="section-title">Communication Methods</h2>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>📞 Multiple Contact Channels</strong>
+                        <p>We use various communication methods to ensure you never miss important opportunities.</p>
+                    </div>
+                    <div class="contact-method" data-method="email">
+                        <strong>📧 Email:</strong> Primary method for job alerts and application updates
+                    </div>
+                    <div class="contact-method" data-method="sms">
+                        <strong>📱 SMS/Text:</strong> Urgent notifications and interview reminders
+                    </div>
+                    <div class="contact-method" data-method="phone">
+                        <strong>📞 Phone Calls:</strong> Direct communication for interviews and offers
+                    </div>
+                    <div class="contact-method" data-method="push">
+                        <strong>🔔 Push Notifications:</strong> Platform updates and new opportunities
+                    </div>
+                </div>
+            </section>
+            <section class="terms-section" id="communication-rights">
+                <h2 class="section-title">Your Communication Rights</h2>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Opt-Out Rights:</strong> You can unsubscribe from marketing communications at any time</li>
+                        <li><strong>Preference Center:</strong> Manage your communication preferences in your account</li>
+                        <li><strong>Response Time:</strong> We aim to respond to inquiries within 2 business days</li>
+                        <li><strong>Data Privacy:</strong> We respect your privacy and follow all data protection regulations</li>
+                    </ul>
+                </div>
+            </section>
+            <section class="terms-section" id="consent-management">
+                <h2 class="section-title">Consent Management</h2>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>🎛️ Full Control Over Communications</strong>
+                        <p>You have complete control over how and when we contact you.</p>
+                    </div>
+                    <ul>
+                        <li><strong>Explicit Consent:</strong> By submitting your application, you consent to receive job-related communications</li>
+                        <li><strong>Marketing Opt-Out:</strong> You can opt-out of promotional emails while maintaining essential communications</li>
+                        <li><strong>Channel Preferences:</strong> Choose your preferred communication methods in your account settings</li>
+                        <li><strong>Immediate Updates:</strong> Preference changes take effect within 24 hours</li>
+                    </ul>
+                </div>
+            </section>
+            <button class="back-button" id="backButton">← Back to Application</button>
+        </div>
+    </main>
+
+    <script>
+        // ✅ ENHANCED GA4 TRACKING WITH L1 ATTRIBUTION
+        document.addEventListener('DOMContentLoaded', () => {
+            // Track page view with L1 attribution
+            gtag('event', 'terms_page_view', {
+                'event_category': 'Terms & Conditions',
+                'event_label': 'Communication Terms - Page View',
+                'page_title': document.title,
+                'page_location': 'https://L1-domain.com/terms/communication' // Fake L1 URL
+            });
+
+            // Track contact method clicks
+            document.querySelectorAll('.contact-method').forEach(method => {
+                method.addEventListener('click', () => {
+                    const methodType = method.getAttribute('data-method');
+                    gtag('event', 'terms_contact_method_click', {
+                        'event_category': 'Terms & Conditions',
+                        'event_label': `Communication - Clicked: ${methodType}`,
+                        'method_type': methodType,
+                        'page_location': 'https://L1-domain.com/terms/communication' // Fake L1 URL
+                    });
+                });
+            });
+
+            // Track section visibility with L1 attribution
+            const sections = document.querySelectorAll('.terms-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const sectionId = entry.target.id;
+                        const sectionTitle = entry.target.querySelector('.section-title').textContent;
+
+                        gtag('event', 'terms_section_view', {
+                            'event_category': 'Terms & Conditions',
+                            'event_label': `Communication - Viewed: ${sectionTitle}`,
+                            'section_id': sectionId,
+                            'section_title': sectionTitle,
+                            'page_location': 'https://L1-domain.com/terms/communication' // Fake L1 URL
+                        });
+                    }
+                });
+            }, { threshold: 0.6 });
+
+            sections.forEach(section => observer.observe(section));
+
+            // Track scroll depth with L1 attribution
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            let maxScroll = 0;
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+
+                if (scrollPercent > maxScroll) {
+                    maxScroll = scrollPercent;
+                    if (scrollIndicator) scrollIndicator.textContent = `Scroll: ${Math.round(maxScroll)}%`;
+
+                    // Track major scroll milestones
+                    const milestones = [25, 50, 75, 90, 100];
+                    milestones.forEach(milestone => {
+                        if (Math.round(maxScroll) === milestone) {
+                            gtag('event', 'terms_scroll_depth', {
+                                'event_category': 'Terms & Conditions',
+                                'event_label': `Communication - Scrolled ${milestone}%`,
+                                'scroll_depth': milestone,
+                                'page_location': 'https://L1-domain.com/terms/communication' // Fake L1 URL
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Track back button click with L1 attribution
+            document.getElementById('backButton').addEventListener('click', () => {
+                gtag('event', 'terms_back_click', {
+                    'event_category': 'Navigation',
+                    'event_label': 'Communication - Back to Application',
+                    'scroll_depth_reached': Math.round(maxScroll),
+                    'time_on_page': Math.round((Date.now() - pageStartTime) / 1000),
+                    'page_location': 'https://L1-domain.com/terms/communication' // Fake L1 URL
+                });
+                window.history.back();
+            });
+
+            // Track time on page
+            const pageStartTime = Date.now();
+            window.addEventListener('beforeunload', () => {
+                const timeSpent = Math.round((Date.now() - pageStartTime) / 1000);
+                gtag('event', 'terms_time_spent', {
+                    'event_category': 'Terms & Conditions',
+                    'event_label': 'Communication - Time Spent',
+                    'time_seconds': timeSpent,
+                    'scroll_depth': Math.round(maxScroll),
+                    'page_location': 'https://L1-domain.com/terms/communication' // Fake L1 URL
+                });
+            });
+
+            // ✅ PRESERVE GCLID/UTM PARAMETERS FOR SESSION CONTINUITY
+            function preserveCampaignParams() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const campaignParams = {};
+
+                // Capture all marketing parameters
+                for (const [key, value] of urlParams) {
+                    if (key.includes('utm_') || key === 'gclid' || key === 'fbclid') {
+                        campaignParams[key] = value;
+                    }
+                }
+
+                return campaignParams;
+            }
+
+            // Add parameters to back button if needed
+            const backButton = document.getElementById('backButton');
+            backButton.addEventListener('click', () => {
+                const params = preserveCampaignParams();
+                if (Object.keys(params).length > 0) {
+                    // You could modify the back navigation to preserve parameters
+                    // This ensures session continuity when returning to L2
+                }
+            });
+        });
+    </script>
+</body>
+</html>
