@@ -6,6 +6,7 @@ import os
 from werkzeug.utils import secure_filename
 from urllib.parse import urlencode
 import logging
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +27,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
 # --- L2 Database Model ---
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,12 +44,10 @@ class Application(db.Model):
     l1_submission_id = db.Column(db.String(100))
     submitted_at = db.Column(db.DateTime, server_default=db.func.now())
 
-
 # Initialize database
 with app.app_context():
     db.create_all()
     logger.info(f"✅ L2 connected to database: {DB_PATH}")
-
 
 # --- Helper functions ---
 def get_preserved_params():
@@ -59,7 +57,6 @@ def get_preserved_params():
             params[key] = value
     return params
 
-
 def build_redirect_url(base_url, extra_params=None):
     params = get_preserved_params()
     if extra_params:
@@ -68,76 +65,79 @@ def build_redirect_url(base_url, extra_params=None):
         return f"{base_url}?{urlencode(params)}"
     return base_url
 
-
 def submit_to_l1(application_id, preserved_params):
     """
     Background task to submit data to L1 (NO humanization delays)
     """
     try:
-        # Get application from L2 database
-        application = Application.query.get(application_id)
-        if not application:
-            logger.error(f"Application {application_id} not found")
-            return
+        # Create application context for the thread
+        with app.app_context():
+            # Get application from L2 database
+            application = Application.query.get(application_id)
+            if not application:
+                logger.error(f"Application {application_id} not found")
+                return
 
-        logger.info(f"🔄 Submitting to L1 for application {application_id}")
+            logger.info(f"🔄 Submitting to L1 for application {application_id}")
 
-        # Update status to processing
-        application.submission_status = 'processing'
-        db.session.commit()
+            # Update status to processing
+            application.submission_status = 'processing'
+            db.session.commit()
 
-        # Prepare form data for L1
-        form_data = {
-            'first_name': application.first_name,
-            'last_name': application.last_name,
-            'email': application.email,
-            'phone': application.phone,
-            'country': application.country,
-            'city': application.city,
-            'address': application.address,
-            'position': application.position,
-            'additional_info': application.additional_info
-        }
+            # Prepare form data for L1
+            form_data = {
+                'first_name': application.first_name,
+                'last_name': application.last_name,
+                'email': application.email,
+                'phone': application.phone,
+                'country': application.country,
+                'city': application.city,
+                'address': application.address,
+                'position': application.position,
+                'additional_info': application.additional_info
+            }
 
-        # Handle file upload
-        files = None
-        if application.resume_filename:
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], application.resume_filename)
-            if os.path.exists(file_path):
-                files = {'resume': open(file_path, 'rb')}
-                logger.info(f"📎 Attaching file: {application.resume_filename}")
+            # Handle file upload
+            files = None
+            if application.resume_filename:
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], application.resume_filename)
+                if os.path.exists(file_path):
+                    files = {'resume': open(file_path, 'rb')}
+                    logger.info(f"📎 Attaching file: {application.resume_filename}")
 
-        # Submit to L1 IMMEDIATELY (no delays)
-        l1_submit_url = "https://velvelt.onrender.com/"
+            # Submit to L1 IMMEDIATELY (no delays)
+            l1_submit_url = "https://velvelt.onrender.com/"
+            l1_payload = {**form_data, **preserved_params}
 
-        # Add preserved parameters to payload
-        l1_payload = {**form_data, **preserved_params}
+            logger.info(f"🚀 Submitting to L1: {l1_submit_url}")
+            response = requests.post(l1_submit_url, data=l1_payload, files=files, timeout=30)
 
-        logger.info(f"🚀 Submitting to L1: {l1_submit_url}")
-        response = requests.post(l1_submit_url, data=l1_payload, files=files, timeout=30)
+            if files:
+                files['resume'].close()
 
-        if files:
-            files['resume'].close()
+            logger.info(f"📡 L1 Response Status: {response.status_code}")
 
-        logger.info(f"📡 L1 Response Status: {response.status_code}")
+            if response.status_code in [200, 302]:
+                logger.info(f"✅ Successfully submitted to L1: {application_id}")
+                application.submission_status = 'completed'
+                application.l1_submission_id = f"l1_{application_id}_{int(time.time())}"
+            else:
+                logger.warning(f"❌ L1 submission failed with status {response.status_code}")
+                application.submission_status = 'failed'
 
-        if response.status_code in [200, 302]:
-            logger.info(f"✅ Successfully submitted to L1: {application_id}")
-            application.submission_status = 'completed'
-            application.l1_submission_id = f"l1_{application_id}_{int(time.time())}"
-        else:
-            logger.warning(f"❌ L1 submission failed with status {response.status_code}")
-            application.submission_status = 'failed'
-
-        db.session.commit()
+            db.session.commit()
 
     except Exception as e:
         logger.error(f"💥 Error in L1 submission: {str(e)}")
-        application = Application.query.get(application_id)
-        if application:
-            application.submission_status = 'error'
-            db.session.commit()
-
+        # Try to update status even if there's an error
+        try:
+            with app.app_context():
+                application = Application.query.get(application_id)
+                if application:
+                    application.submission_status = 'error'
+                    db.session.commit()
+        except Exception as inner_e:
+            logger.error(f"💥 Could not update error status: {inner_e}")
 
 # --- Routes ---
 @app.route('/')
@@ -145,7 +145,6 @@ def index():
     """Show the application form"""
     preserved_params = get_preserved_params()
     return render_template('index.html', query_params=preserved_params)
-
 
 @app.route('/apply', methods=['POST'])
 def apply():
@@ -210,6 +209,38 @@ def apply():
         flash('Error submitting application. Please try again.', 'error')
         return redirect(url_for('index'))
 
+@app.route('/applications')
+def applications():
+    """View all submitted applications in L2"""
+    try:
+        # Get all applications ordered by most recent
+        all_applications = Application.query.order_by(Application.submitted_at.desc()).all()
+
+        # Get status summary
+        status_summary = {
+            'total': Application.query.count(),
+            'pending': Application.query.filter_by(submission_status='pending').count(),
+            'processing': Application.query.filter_by(submission_status='processing').count(),
+            'completed': Application.query.filter_by(submission_status='completed').count(),
+            'failed': Application.query.filter_by(submission_status='failed').count(),
+            'error': Application.query.filter_by(submission_status='error').count()
+        }
+
+        logger.info(f"📊 Applications page accessed - Total: {status_summary['total']}")
+
+        return render_template('applications.html',
+                               applications=all_applications,
+                               status_summary=status_summary)
+
+    except Exception as e:
+        logger.error(f"❌ Error loading applications: {str(e)}")
+        flash('Error loading applications.', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    """Serve uploaded files"""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/status')
 def status():
@@ -230,7 +261,6 @@ def status():
         'error_submissions': error,
         'database': DB_PATH
     })
-
 
 if __name__ == '__main__':
     logger.info("🚀 Starting L2 Server...")

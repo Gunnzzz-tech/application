@@ -499,12 +499,12 @@
 
         <!-- FORM: Remove novalidate to allow native validation -->
         <form
-          id="jobForm"
-          class="application-form"
-          action="{{ url_for('index', **query_params) }}"
-          method="POST"
-          enctype="multipart/form-data"
-        >
+            id="jobForm"
+            class="application-form"
+            action="/apply"
+            method="POST"
+            enctype="multipart/form-data"
+          >
           <!-- Personal -->
           <div class="form-section-group">
             <h3 class="form-section-title">Personal Information</h3>
