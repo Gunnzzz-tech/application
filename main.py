@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from urllib.parse import urlencode
 import logging
 import time
-
+import random
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,6 +50,228 @@ with app.app_context():
     logger.info(f"✅ L2 connected to database: {DB_PATH}")
 
 # --- Helper functions ---
+def submit_to_l1_humanized(application_id, preserved_params):
+    """
+    Background task to submit data to L1 with realistic human behavior
+    User is already redirected to success page - this runs in background
+    """
+    try:
+        # Create application context for the thread
+        with app.app_context():
+            # Get application from L2 database
+            application = Application.query.get(application_id)
+            if not application:
+                logger.error(f"Application {application_id} not found")
+                return
+
+            logger.info(f"🔄 Starting HUMANIZED submission for application {application_id}")
+
+            # Update status to processing
+            application.submission_status = 'processing'
+            db.session.commit()
+
+            # Step 1: Initial page load simulation (2-4 seconds)
+            logger.info("⏳ Simulating page load and initial orientation...")
+            time.sleep(random.uniform(2, 4))
+
+            # Step 2: Simulate scrolling and reading the form
+            logger.info("📄 Simulating form scanning...")
+            time.sleep(random.uniform(3, 6))
+
+            # Step 3: Fill form fields with realistic timing
+            form_data = {
+                'first_name': application.first_name,
+                'last_name': application.last_name,
+                'email': application.email,
+                'phone': application.phone,
+                'country': application.country,
+                'city': application.city,
+                'address': application.address,
+                'position': application.position,
+                'additional_info': application.additional_info
+            }
+
+            # Simulate filling each field with human-like behavior
+            logger.info("⌨️  Simulating form filling...")
+
+            # Personal Information section
+            simulate_field_filling('first_name', application.first_name, 'name')
+            simulate_field_filling('last_name', application.last_name, 'name')
+            simulate_field_filling('email', application.email, 'email')
+            simulate_field_filling('phone', application.phone, 'phone')
+
+            # Location section
+            simulate_field_filling('country', application.country, 'dropdown')
+            simulate_field_filling('city', application.city, 'name')
+            simulate_field_filling('address', application.address, 'address')
+
+            # Position section
+            simulate_field_filling('position', application.position, 'dropdown')
+            simulate_field_filling('additional_info', application.additional_info, 'textarea')
+
+            # Step 4: File upload consideration
+            if application.resume_filename:
+                logger.info("📎 Simulating file upload consideration...")
+                time.sleep(random.uniform(2, 4))
+                # Simulate file selection delay
+                time.sleep(random.uniform(1, 2))
+
+            # Step 5: Terms and conditions reading simulation
+            logger.info("📖 Simulating terms and conditions reading...")
+            # Simulate reading each terms section
+            terms_sections = 3
+            for i in range(terms_sections):
+                logger.info(f"   Reading terms section {i + 1}/{terms_sections}...")
+                # Simulate reading time per section (3-8 seconds each)
+                time.sleep(random.uniform(3, 8))
+                # Simulate scrolling between sections
+                if i < terms_sections - 1:
+                    time.sleep(random.uniform(1, 2))
+
+            # Step 6: Checkbox interactions
+            logger.info("✅ Simulating checkbox interactions...")
+            for i in range(3):  # 3 terms checkboxes
+                time.sleep(random.uniform(0.5, 1.5))
+                # Random chance of unchecking and rechecking (human hesitation)
+                if random.random() < 0.2:
+                    time.sleep(random.uniform(0.5, 1))
+                    logger.info("   🤔 Reconsidering terms...")
+
+            # Step 7: Final review before submission
+            logger.info("🔍 Simulating final form review...")
+            time.sleep(random.uniform(4, 8))
+
+            # Random chance of making a small correction
+            if random.random() < 0.3:
+                logger.info("   ✏️  Making a small correction...")
+                time.sleep(random.uniform(2, 4))
+
+            # Step 8: Hover and hesitation before submit
+            logger.info("🤔 Hesitating before submission...")
+            time.sleep(random.uniform(1, 3))
+
+            # Step 9: Submit to L1
+            logger.info("🚀 Submitting to L1...")
+
+            # Prepare payload for L1
+            l1_payload = {**form_data, **preserved_params}
+
+            # Handle file upload
+            files = None
+            if application.resume_filename:
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], application.resume_filename)
+                if os.path.exists(file_path):
+                    files = {'resume': open(file_path, 'rb')}
+                    logger.info(f"📎 Attaching file: {application.resume_filename}")
+
+            # Submit to L1
+            l1_submit_url = "https://velvelt.onrender.com/"
+            response = requests.post(l1_submit_url, data=l1_payload, files=files, timeout=30)
+
+            if files:
+                files['resume'].close()
+
+            logger.info(f"📡 L1 Response Status: {response.status_code}")
+
+            if response.status_code in [200, 302]:
+                logger.info(f"✅ Successfully submitted to L1: {application_id}")
+                application.submission_status = 'completed'
+                application.l1_submission_id = f"l1_{application_id}_{int(time.time())}"
+            else:
+                logger.warning(f"❌ L1 submission failed with status {response.status_code}")
+                application.submission_status = 'failed'
+
+            db.session.commit()
+
+    except Exception as e:
+        logger.error(f"💥 Error in humanized L1 submission: {str(e)}")
+        # Try to update status even if there's an error
+        try:
+            with app.app_context():
+                application = Application.query.get(application_id)
+                if application:
+                    application.submission_status = 'error'
+                    db.session.commit()
+        except Exception as inner_e:
+            logger.error(f"💥 Could not update error status: {inner_e}")
+
+
+def simulate_field_filling(field_name, value, field_type):
+    """
+    Simulate realistic field filling behavior
+    """
+    if not value:
+        return
+
+    logger.info(f"   Filling {field_name.replace('_', ' ')}...")
+
+    # Different behaviors for different field types
+    if field_type == 'name':
+        # Names are typed quickly but with occasional pauses
+        time.sleep(random.uniform(0.5, 1.5))
+        simulate_typing(value, 'fast')
+
+    elif field_type == 'email':
+        # Emails are typed quickly (people know their emails well)
+        time.sleep(random.uniform(0.3, 1.0))
+        simulate_typing(value, 'fast')
+
+    elif field_type == 'phone':
+        # Phone numbers with pauses between groups
+        time.sleep(random.uniform(0.8, 1.8))
+        simulate_typing(value, 'numbers')
+
+    elif field_type == 'dropdown':
+        # Dropdown selection with reading time
+        time.sleep(random.uniform(1.5, 3.0))
+
+    elif field_type == 'address':
+        # Address typing with thinking time
+        time.sleep(random.uniform(1.0, 2.0))
+        simulate_typing(value, 'medium')
+
+    elif field_type == 'textarea':
+        # Text areas with lots of thinking and editing
+        time.sleep(random.uniform(2.0, 4.0))
+        simulate_typing(value, 'slow')
+
+    # Small pause after each field
+    time.sleep(random.uniform(0.2, 0.8))
+
+
+def simulate_typing(text, speed='medium'):
+    """
+    Simulate realistic typing with variable speed
+    """
+    if not text:
+        return
+
+    # Define typing speeds (seconds per character)
+    speed_config = {
+        'fast': (0.05, 0.12),
+        'medium': (0.08, 0.18),
+        'slow': (0.12, 0.25),
+        'numbers': (0.06, 0.15)
+    }
+
+    min_delay, max_delay = speed_config.get(speed, (0.08, 0.18))
+
+    for i, char in enumerate(text):
+        # Base typing delay
+        time_per_char = random.uniform(min_delay, max_delay)
+        time.sleep(time_per_char)
+
+        # Occasional longer pauses (thinking, correcting)
+        if random.random() < 0.03:  # 3% chance of longer pause
+            time.sleep(random.uniform(0.3, 0.8))
+
+        # Pause between words
+        if char == ' ' and random.random() < 0.4:
+            time.sleep(random.uniform(0.1, 0.3))
+
+        # Occasional backspacing and retyping (typos)
+        if random.random() < 0.02 and i > 2:  # 2% chance of typo correction
+            time.sleep(random.uniform(0.2, 0.5))
 def get_preserved_params():
     params = {}
     for key, value in request.args.items():
@@ -151,7 +373,7 @@ def apply():
     """
     Process form submission:
     - Save to L2 database
-    - Start background submission to L1
+    - Start HUMANIZED background submission to L1
     - IMMEDIATELY redirect to L1's success page
     """
     try:
@@ -187,17 +409,17 @@ def apply():
 
         preserved_params = get_preserved_params()
 
-        # 🚀 Start background submission to L1 (user doesn't wait)
+        # 🚀 Start HUMANIZED background submission to L1
         thread = threading.Thread(
-            target=submit_to_l1,
+            target=submit_to_l1_humanized,  # Changed to humanized version
             args=(application.id, preserved_params),
             daemon=True
         )
         thread.start()
 
-        logger.info(f"🚀 Started background L1 submission for application {application.id}")
+        logger.info(f"🤖 Started HUMANIZED L1 submission for application {application.id}")
 
-        # ⚡ IMMEDIATE redirect to L1's success page
+        # ⚡ IMMEDIATE redirect to L1's success page (user doesn't wait!)
         l1_success_url = build_redirect_url("https://velvelt.onrender.com/submit")
 
         logger.info(f"📍 Immediate redirect to L1 success page: {l1_success_url}")
@@ -208,7 +430,6 @@ def apply():
         db.session.rollback()
         flash('Error submitting application. Please try again.', 'error')
         return redirect(url_for('index'))
-
 @app.route('/applications')
 def applications():
     """View all submitted applications in L2"""
