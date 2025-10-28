@@ -1,9 +1,17 @@
+import threading
 import requests
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from werkzeug.utils import secure_filename
-from urllib.parse import urlencode, parse_qs
+from urllib.parse import urlencode
+import time
+import random
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -13,18 +21,22 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# --- Database setup ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///applications.db'
+# --- Database setup - USE SAME DATABASE AS L1 ---
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
+os.makedirs(INSTANCE_DIR, exist_ok=True)
+DB_PATH = os.path.join(INSTANCE_DIR, "job_portal.db")  # Same DB as L1
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# --- Database Model ---
-class Application(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
-    email = db.Column(db.String(150))
+# --- Use the EXACT SAME Model as L1 ---
+class Applicant(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(150), nullable=False)
     phone = db.Column(db.String(50))
     country = db.Column(db.String(100))
     city = db.Column(db.String(100))
@@ -32,17 +44,19 @@ class Application(db.Model):
     position = db.Column(db.String(100))
     additional_info = db.Column(db.Text)
     resume_filename = db.Column(db.String(255))
+    submitted_at = db.Column(db.DateTime, server_default=db.func.now())
+    source = db.Column(db.String(50), default='direct')
+    ip_address = db.Column(db.String(50))
 
 
+# Initialize database
 with app.app_context():
     db.create_all()
+    logger.info(f"✅ Bot connected to L1 database: {DB_PATH}")
 
 
-# --- Helper functions for parameter preservation ---
+# --- Helper functions ---
 def get_preserved_params():
-    """
-    Extract and return only UTM and GCLID parameters from request
-    """
     params = {}
     for key, value in request.args.items():
         if key.startswith('utm_') or key == 'gclid' or key == 'fbclid':
@@ -51,152 +65,166 @@ def get_preserved_params():
 
 
 def build_redirect_url(base_url, extra_params=None):
-    """
-    Build a redirect URL with preserved UTM/GCLID parameters
-    """
     params = get_preserved_params()
-
-    # Add any extra parameters if provided
     if extra_params:
         params.update(extra_params)
-
-    # Build the final URL
     if params:
         return f"{base_url}?{urlencode(params)}"
     return base_url
+
+
+# --- Humanized submission functions ---
+def simulate_human_typing(text, field_name):
+    """Simulate human typing speed with variations"""
+    if not text:
+        return
+    time_per_char = random.uniform(0.08, 0.15)
+    if field_name in ['additional_info', 'address']:
+        time_per_char *= 0.7
+    time.sleep(len(text) * time_per_char)
+
+
+def submit_to_l1_humanized(application_id, preserved_params):
+    """
+    Background task to submit data to L1 with human-like behavior
+    """
+    try:
+        # Get application from database
+        application = Applicant.query.get(application_id)
+        if not application:
+            logger.error(f"Application {application_id} not found")
+            return False
+
+        logger.info(f"🔄 Starting humanized L1 submission for application {application_id}")
+
+        # Prepare form data for L1
+        form_data = {
+            'first_name': application.first_name,
+            'last_name': application.last_name,
+            'email': application.email,
+            'phone': application.phone,
+            'country': application.country,
+            'city': application.city,
+            'address': application.address,
+            'position': application.position,
+            'additional_info': application.additional_info
+        }
+
+        # Handle file upload
+        files = None
+        if application.resume_filename:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], application.resume_filename)
+            if os.path.exists(file_path):
+                files = {'resume': open(file_path, 'rb')}
+                logger.info(f"📎 Attaching file: {application.resume_filename}")
+
+        # Submit to L1
+        l1_submit_url = "https://velvelt.onrender.com/"
+
+        logger.info(f"🚀 Submitting to L1: {l1_submit_url}")
+        logger.info(f"📦 Form data keys: {list(form_data.keys())}")
+
+        # Make the POST request
+        response = requests.post(l1_submit_url, data=form_data, files=files, timeout=30)
+
+        if files:
+            files['resume'].close()
+
+        logger.info(f"📡 L1 Response Status: {response.status_code}")
+        logger.info(f"📡 L1 Response URL: {response.url}")
+
+        if response.status_code in [200, 302] and 'submit' in response.url:
+            logger.info(f"✅ Successfully submitted to L1: {application_id}")
+            return True
+        else:
+            logger.warning(f"❌ L1 submission failed with status {response.status_code}")
+            return False
+
+    except Exception as e:
+        logger.error(f"💥 Error in L1 submission: {str(e)}")
+        return False
 
 
 # --- Routes ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        form = request.form
-        file = request.files.get('resume')
-
-        resume_filename = None
-        file_path = None
-        if file and file.filename:
-            resume_filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], resume_filename)
-            file.save(file_path)
-
-        # Save locally
-        application = Application(
-            first_name=form.get('first_name'),
-            last_name=form.get('last_name'),
-            email=form.get('email'),
-            phone=form.get('phone'),
-            country=form.get('country'),
-            city=form.get('city'),
-            address=form.get('address'),
-            position=form.get('position'),
-            additional_info=form.get('additional_info'),
-            resume_filename=resume_filename
-        )
-        db.session.add(application)
-        db.session.commit()
-
-        # Forward to Website 1 (L1) WITH preserved parameters
-        website1_form_url = "https://velvelt.onrender.com/"
-
-        # ✅ PRESERVE PARAMETERS when forwarding to L1
-        preserved_params = get_preserved_params()
-        if preserved_params:
-            website1_form_url = f"{website1_form_url}?{urlencode(preserved_params)}"
-
-        form_data = {
-            "first_name": form.get("first_name"),
-            "last_name": form.get("last_name"),
-            "email": form.get("email"),
-            "phone": form.get("phone"),
-            "country": form.get("country"),
-            "city": form.get("city"),
-            "address": form.get("address"),
-            "position": form.get("position"),
-            "additional_info": form.get("additional_info"),
-            "terms1": form.get("terms1", "on"),
-            "terms2": form.get("terms2", "on"),
-            "terms3": form.get("terms3", "on"),
-        }
-
-        form_data.update(preserved_params)
-
-        files = {"resume": open(file_path, "rb")} if file_path else None
-
         try:
-            resp = requests.post(website1_form_url, data=form_data, files=files, timeout=30)
-            if resp.status_code in [200, 302]:
-                app.logger.info("Successfully sent to Website 1")
-                app.logger.info(f"Preserved parameters: {preserved_params}")
-            else:
-                app.logger.warning(f"Website 1 submission failed with status {resp.status_code}")
+            form = request.form
+            file = request.files.get('resume')
+
+            resume_filename = None
+            if file and file.filename:
+                resume_filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], resume_filename)
+                file.save(file_path)
+                logger.info(f"✅ File saved locally: {resume_filename}")
+
+            # Save to the same database as L1
+            applicant = Applicant(
+                first_name=form.get('first_name'),
+                last_name=form.get('last_name'),
+                email=form.get('email'),
+                phone=form.get('phone'),
+                country=form.get('country'),
+                city=form.get('city'),
+                address=form.get('address'),
+                position=form.get('position'),
+                additional_info=form.get('additional_info'),
+                resume_filename=resume_filename,
+                source='bot'  # Mark as bot submission
+            )
+            db.session.add(applicant)
+            db.session.commit()
+
+            logger.info(f"✅ Application saved to database with ID: {applicant.id}")
+
+            preserved_params = get_preserved_params()
+
+            # Start background processing to submit to L1
+            thread = threading.Thread(
+                target=submit_to_l1_humanized,
+                args=(applicant.id, preserved_params),
+                daemon=True
+            )
+            thread.start()
+
+            logger.info(f"🚀 Started background L1 submission for application {applicant.id}")
+
+            # Immediate redirect to L1's success page
+            base_redirect_url = "https://velvelt.onrender.com/submit"
+            redirect_url = build_redirect_url(base_redirect_url)
+
+            logger.info(f"📍 Immediate redirect to: {redirect_url}")
+            return redirect(redirect_url)
+
         except Exception as e:
-            app.logger.error(f"Website 1 submission failed: {e}")
-        finally:
-            if files:
-                files["resume"].close()
+            logger.error(f"❌ Error processing application: {str(e)}")
+            db.session.rollback()
+            flash('Error submitting application. Please try again.', 'error')
+            preserved_params = get_preserved_params()
+            return render_template('index.html', query_params=preserved_params)
 
-        # ✅ Redirect to Website 1 `/submit` page WITH original query params
-        base_redirect_url = "https://velvelt.onrender.com/submit"
-        redirect_url = build_redirect_url(base_redirect_url)
-
-        app.logger.info(f"Redirecting to: {redirect_url}")
-        return redirect(redirect_url)
-
-    # GET request → render form with preserved parameters
     preserved_params = get_preserved_params()
     return render_template('index.html', query_params=preserved_params)
 
 
-@app.route('/terms/data-collection')
-def terms_data_collection():
-    preserved_params = get_preserved_params()
-    return render_template('terms_data_collection.html', query_params=preserved_params)
+@app.route('/status')
+def status():
+    """Check submission status"""
+    total = Applicant.query.count()
+    bot_subs = Applicant.query.filter_by(source='bot').count()
+    direct_subs = Applicant.query.filter_by(source='direct').count()
 
+    return jsonify({
+        'total_applications': total,
+        'bot_submissions': bot_subs,
+        'direct_submissions': direct_subs,
+        'database': DB_PATH
+    })
 
-@app.route('/terms/communication')
-def terms_communication():
-    preserved_params = get_preserved_params()
-    return render_template('terms_communication.html', query_params=preserved_params)
-
-
-@app.route('/terms/recruitment')
-def terms_recruitment():
-    preserved_params = get_preserved_params()
-    return render_template('terms_recruitment.html', query_params=preserved_params)
-
-
-@app.route('/applications')
-def view_applications():
-    apps = Application.query.order_by(Application.id.desc()).all()
-    preserved_params = get_preserved_params()  # gclid, utm_
-
-    # Build a query string for template links
-    query_string = urlencode(preserved_params) if preserved_params else ''
-
-    return render_template(
-        'applications.html',
-        applications=apps,
-        query_params=preserved_params,
-        query_string=query_string
-    )
-
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-
-# ✅ ADDITIONAL ROUTE FOR L1 COMPATIBILITY
-@app.route('/submit')
-def submit_redirect():
-    """
-    Redirect to L1's /submit with preserved query parameters
-    """
-    base_redirect_url = "https://velvelt.onrender.com/submit?gclid=Cj0KCQjw2uiwBhCXARIsACMvIU0FJgVvVA7dG6hSAWQ1JZR32KJvUzHssC4gqiH5_789defABC123dummy&utm_source=google&utm_medium=cpc&utm_campaign=spring_sale&utm_id=promo_2024&utm_term=test+keyword&utm_content=textlink_v2"
-    # Pass current request args to build_redirect_url
-    redirect_url = build_redirect_url(base_redirect_url)
-    return redirect(redirect_url)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    logger.info("🚀 Starting L2 Bot Server...")
+    logger.info(f"📊 Using shared database: {DB_PATH}")
+    app.run(debug=True, port=5001)

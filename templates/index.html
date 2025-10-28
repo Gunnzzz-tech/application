@@ -402,10 +402,48 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      display: none;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: var(--muted);
+      font-weight: 600;
+    }
   </style>
 </head>
 
 <body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Submitting your application...</div>
+  </div>
+
   <div class="page">
     <!-- HERO with partner logos and success stats -->
     <header class="hero">
@@ -459,14 +497,13 @@
           <p class="form-description muted">Fill out the form below to submit your application. We keep your resume secure and confidential.</p>
         </div>
 
-        <!-- FORM: kept original Flask action and input names -->
+        <!-- FORM: Remove novalidate to allow native validation -->
         <form
           id="jobForm"
           class="application-form"
           action="{{ url_for('index', **query_params) }}"
           method="POST"
           enctype="multipart/form-data"
-          novalidate
         >
           <!-- Personal -->
           <div class="form-section-group">
@@ -590,7 +627,7 @@
           <div class="form-actions">
             <button type="button" class="btn reset" id="resetBtn">Reset</button>
             <button type="submit" class="btn send" id="submitBtn" aria-live="polite">
-              <svg id="submitSpinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:none;animation:spin 1s linear infinite;">
+              <svg id="submitSpinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:none;">
                 <path d="M12 2a10 10 0 1 0 10 10" stroke="#fff" stroke-width="2" stroke-linecap="round"></path>
               </svg>
               <span id="submitText">Send</span>
@@ -633,72 +670,8 @@
     </main>
   </div>
 
-  <!-- Enhanced JavaScript with comprehensive GA4 tracking -->
+  <!-- Simplified JavaScript - Allows form submission to reach Flask -->
   <script>
-    // Enhanced GA4 Tracking Functions
-    function trackFormInteraction(action, element, value = null) {
-      gtag('event', 'form_interaction', {
-        event_category: 'form',
-        event_label: action,
-        element_type: element.type || 'button',
-        element_name: element.name || element.id || 'unknown',
-        value: value,
-        page_location: 'https://velvelt.onrender.com/'
-      });
-    }
-
-    function trackFormSubmission(formData) {
-      gtag('event', 'form_submission', {
-        event_category: 'conversion',
-        event_label: 'job_application',
-        form_id: 'careers_form',
-        form_type: 'job_application',
-        user_type: 'candidate',
-        page_location: 'https://velvelt.onrender.com/'
-      });
-
-      // Enhanced conversion tracking
-      gtag('event', 'generate_lead', {
-        currency: 'USD',
-        value: 0,
-        page_location: 'https://velvelt.onrender.com/'
-      });
-    }
-
-    function trackButtonClick(button, action) {
-      gtag('event', 'button_click', {
-        event_category: 'engagement',
-        event_label: action,
-        button_text: button.textContent.trim(),
-        button_id: button.id,
-        page_location: 'https://velvelt.onrender.com/'
-      });
-    }
-
-    function trackFileUpload(file) {
-      gtag('event', 'file_upload', {
-        event_category: 'form',
-        event_label: 'resume_upload',
-        file_name: file.name,
-        file_size: file.size,
-        file_type: file.type,
-        page_location: 'https://velvelt.onrender.com/'
-      });
-    }
-
-    // Toast notification function
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      if (!toast) return;
-
-      toast.textContent = message;
-      toast.className = 'toast show ' + type;
-
-      setTimeout(() => {
-        toast.className = 'toast';
-      }, 3000);
-    }
-
     // Elements
     const jobForm = document.getElementById('jobForm');
     const cvInput = document.getElementById('cv');
@@ -707,78 +680,7 @@
     const submitText = document.getElementById('submitText');
     const submitSpinner = document.getElementById('submitSpinner');
     const resetBtn = document.getElementById('resetBtn');
-
-    // Enhanced event listeners with GA4 tracking
-    document.addEventListener('DOMContentLoaded', function() {
-      // Track form field interactions
-      const formFields = document.querySelectorAll('input, select, textarea');
-      formFields.forEach(field => {
-        field.addEventListener('focus', () => {
-          trackFormInteraction('field_focus', field);
-        });
-
-        field.addEventListener('change', () => {
-          trackFormInteraction('field_change', field, field.value);
-        });
-      });
-
-      // Track all button clicks
-      document.querySelectorAll('button').forEach(button => {
-        button.addEventListener('click', () => {
-          trackButtonClick(button, button.textContent.trim());
-        });
-      });
-
-      // Track link clicks
-      document.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          gtag('event', 'link_click', {
-            event_category: 'navigation',
-            event_label: link.textContent.trim(),
-            link_url: link.href,
-            page_location: 'https://velvelt.onrender.com/'
-          });
-        });
-      });
-
-      // Enhanced Terms and Conditions GA4 Tracking
-      const termsLinks = document.querySelectorAll('.terms-link');
-      termsLinks.forEach((link, index) => {
-        link.addEventListener('click', (e) => {
-          const termsPath = link.getAttribute('href').split('/').pop();
-
-          gtag('event', 'terms_view', {
-            event_category: 'Terms & Conditions',
-            event_label: `Viewed ${termsPath} terms`,
-            link_id: `terms${index + 1}`,
-            page_location: 'https://velvelt.onrender.com/'
-          });
-        });
-      });
-
-      // Track terms checkbox interactions
-      const termsCheckboxes = document.querySelectorAll('.terms-checkbox');
-      termsCheckboxes.forEach((checkbox, index) => {
-        checkbox.addEventListener('change', (e) => {
-          const action = e.target.checked ? 'accepted' : 'unchecked';
-          const termsPath = document.querySelector(`#termsLink${index + 1}`).getAttribute('href').split('/').pop();
-
-          gtag('event', 'terms_interaction', {
-            event_category: 'Terms & Conditions',
-            event_label: `${action} ${termsPath}`,
-            terms_id: `terms${index + 1}`,
-            page_location: 'https://velvelt.onrender.com/'
-          });
-        });
-      });
-
-      // Track page view
-      gtag('event', 'page_view', {
-        page_title: 'Apply for a Position — Careers',
-        page_location: 'https://velvelt.onrender.com/',
-        user_type: 'candidate'
-      });
-    });
+    const loadingOverlay = document.getElementById('loadingOverlay');
 
     // Show filename when user selects file
     cvInput.addEventListener('change', () => {
@@ -793,7 +695,6 @@
       if (file.size > maxBytes) {
         fileNameEl.textContent = 'File too large. Max 5MB.';
         fileNameEl.style.color = 'var(--danger)';
-        // Clear file input for user to reselect
         cvInput.value = '';
         return;
       }
@@ -802,79 +703,54 @@
       fileNameEl.textContent = file.name;
 
       // Track file upload
-      trackFileUpload(file);
+      gtag('event', 'file_upload', {
+        event_category: 'form',
+        event_label: 'resume_upload',
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        page_location: 'https://velvelt.onrender.com/'
+      });
     });
 
-    // Form client-side validation + loading state
+    // Form submission - Show loading and track, but ALLOW form to submit
     jobForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+      // Don't prevent default - let the form submit to Flask
 
-      // Native constraint validation
-      if (!jobForm.checkValidity()) {
-        jobForm.reportValidity();
-        return;
-      }
+      // Show loading overlay immediately
+      loadingOverlay.style.display = 'flex';
 
-      // Extra check: ensure resume chosen
-      if (!cvInput.files || cvInput.files.length === 0) {
-        cvInput.focus();
-        fileNameEl.textContent = 'Please upload your resume.';
-        fileNameEl.style.color = 'var(--danger)';
-        return;
-      }
-
-      // Check terms acceptance
-      const termsCheckboxes = document.querySelectorAll('.terms-checkbox');
-      const allTermsChecked = Array.from(termsCheckboxes).every(cb => cb.checked);
-
-      if (!allTermsChecked) {
-        showToast('Please accept all terms and conditions', 'error');
-        gtag('event', 'form_validation_failed', {
-          event_category: 'Form',
-          event_label: 'Terms not accepted',
-          page_location: 'https://velvelt.onrender.com/'
-        });
-        return;
-      }
-
-      // Start loading state
+      // Disable submit button
       submitBtn.disabled = true;
       submitSpinner.style.display = 'inline-block';
       submitText.textContent = 'Sending...';
 
-      // Track form submission
-      const formData = new FormData(jobForm);
-      trackFormSubmission(formData);
+      // Track form submission to GA4
+      gtag('event', 'form_submission', {
+        event_category: 'conversion',
+        event_label: 'job_application',
+        form_id: 'careers_form',
+        form_type: 'job_application',
+        user_type: 'candidate',
+        page_location: 'https://velvelt.onrender.com/'
+      });
 
-      // Simulate upload and submission
-      setTimeout(() => {
-        // End loading state
-        submitSpinner.style.display = 'none';
-        submitText.textContent = 'Sent ✓';
-        submitBtn.style.boxShadow = '0 8px 24px rgba(6,182,164,0.12)';
-        submitBtn.disabled = false;
+      gtag('event', 'generate_lead', {
+        currency: 'USD',
+        value: 0,
+        page_location: 'https://velvelt.onrender.com/'
+      });
 
-        // Track successful submission
-        gtag('event', 'form_submission_success', {
-          event_category: 'conversion',
-          event_label: 'job_application_success',
-          page_location: 'https://velvelt.onrender.com/'
-        });
-
-        showToast('Application submitted successfully!', 'success');
-
-        // Optional: actually submit the form
-        // jobForm.submit();
-      }, 1500);
+      // The form will now naturally submit to Flask
+      // Flask will process and redirect to L1 instantly
     });
 
-    // Reset button resets form and file label
+    // Reset button
     resetBtn.addEventListener('click', () => {
       jobForm.reset();
       fileNameEl.textContent = 'Click to upload your resume (PDF, DOC, DOCX)';
       fileNameEl.style.color = '';
 
-      // Track form reset
       gtag('event', 'form_reset', {
         event_category: 'form',
         event_label: 'form_reset',
@@ -899,6 +775,43 @@
       }, 16);
     });
 
+    // Enhanced GA4 Tracking for interactions (non-blocking)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Track form field interactions
+      const formFields = document.querySelectorAll('input, select, textarea');
+      formFields.forEach(field => {
+        field.addEventListener('focus', () => {
+          gtag('event', 'form_interaction', {
+            event_category: 'form',
+            event_label: 'field_focus',
+            element_type: field.type,
+            element_name: field.name || field.id,
+            page_location: 'https://velvelt.onrender.com/'
+          });
+        });
+      });
+
+      // Track terms checkbox interactions
+      const termsCheckboxes = document.querySelectorAll('.terms-checkbox');
+      termsCheckboxes.forEach((checkbox, index) => {
+        checkbox.addEventListener('change', (e) => {
+          const action = e.target.checked ? 'accepted' : 'unchecked';
+          gtag('event', 'terms_interaction', {
+            event_category: 'Terms & Conditions',
+            event_label: `${action} terms${index + 1}`,
+            page_location: 'https://velvelt.onrender.com/'
+          });
+        });
+      });
+
+      // Track page view
+      gtag('event', 'page_view', {
+        page_title: 'Apply for a Position — Careers',
+        page_location: 'https://velvelt.onrender.com/',
+        user_type: 'candidate'
+      });
+    });
+
     // Track scroll depth
     let scrollTracked = false;
     window.addEventListener('scroll', () => {
@@ -911,51 +824,6 @@
         scrollTracked = true;
       }
     });
-
-    // Track time on page
-    const pageStartTime = Date.now();
-    window.addEventListener('beforeunload', () => {
-      const timeSpent = Math.round((Date.now() - pageStartTime) / 1000);
-      gtag('event', 'page_time_spent', {
-        event_category: 'Engagement',
-        event_label: 'Time spent on page',
-        time_seconds: timeSpent,
-        page_location: 'https://velvelt.onrender.com/'
-      });
-    });
   </script>
-
-  <!-- Toast Notification Styles -->
-  <style>
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 500;
-      z-index: 1000;
-      transform: translateX(400px);
-      transition: transform 0.3s ease;
-      max-width: 300px;
-    }
-
-    .toast.show {
-      transform: translateX(0);
-    }
-
-    .toast.success {
-      background: var(--success);
-    }
-
-    .toast.error {
-      background: var(--danger);
-    }
-
-    .toast.info {
-      background: var(--accent);
-    }
-  </style>
 </body>
 </html>
